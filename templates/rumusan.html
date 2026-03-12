@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}Rumusan Tingkatan {{ form_filter }} - DAPA 2026{% endblock %}
+{% block content %}
+<div class="space-y-5">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-extrabold text-slate-800">Rumusan Tingkatan {{ form_filter }}</h2>
+            <p class="text-sm text-slate-500">{{ exam_label }} 2026 — Kedudukan &amp; Analisis Pencapaian</p>
+        </div>
+        <a href="/print/rumusan/{{ form_filter }}?exam={{ exam_filter }}" target="_blank" class="px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">Cetak Rumusan PDF</a>
+    </div>
+
+    <!-- Exam selector -->
+    <div class="flex flex-wrap gap-2">
+        <span class="px-3 py-2 text-xs font-bold text-slate-400 uppercase">Peperiksaan:</span>
+        {% for ex in exams %}
+        <a href="/rumusan?exam={{ ex }}&form={{ form_filter }}&tab={{ tab }}" class="px-4 py-2 text-sm font-bold rounded-lg {% if exam_filter == ex %}bg-emerald-600 text-white{% else %}bg-white text-slate-600 border hover:bg-emerald-50{% endif %}">{{ exam_labels.get(ex, ex) }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- Form selector -->
+    <div class="flex flex-wrap gap-2">
+        <span class="px-3 py-2 text-xs font-bold text-slate-400 uppercase">Tingkatan:</span>
+        {% for f in ['1','2','3','4','5'] %}
+        <a href="/rumusan?form={{ f }}&exam={{ exam_filter }}&tab={{ tab }}" class="px-5 py-2 text-sm font-bold rounded-lg {% if form_filter == f|string %}bg-indigo-600 text-white{% else %}bg-white text-slate-600 border hover:bg-indigo-50{% endif %}">Tingkatan {{ f }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- Tab selector -->
+    <div class="flex gap-2 border-b pb-2">
+        <a href="/rumusan?form={{ form_filter }}&exam={{ exam_filter }}&tab=ranking" class="px-5 py-2 text-sm font-bold rounded-t-lg {% if tab == 'ranking' %}bg-white border border-b-0 text-indigo-700{% else %}text-slate-500 hover:text-slate-700{% endif %}">Kedudukan Pelajar</a>
+        <a href="/rumusan?form={{ form_filter }}&exam={{ exam_filter }}&tab=analisis" class="px-5 py-2 text-sm font-bold rounded-t-lg {% if tab == 'analisis' %}bg-white border border-b-0 text-indigo-700{% else %}text-slate-500 hover:text-slate-700{% endif %}">Analisis Pencapaian Mengikut Kelas</a>
+        <a href="/rumusan?form={{ form_filter }}&exam={{ exam_filter }}&tab=analisis_penuh" class="px-5 py-2 text-sm font-bold rounded-t-lg {% if tab == 'analisis_penuh' %}bg-white border border-b-0 text-indigo-700{% else %}text-slate-500 hover:text-slate-700{% endif %}">Analisis Penuh</a>
+    </div>
+
+    {% if tab == 'ranking' %}
+    <!-- ============ KEDUDUKAN PELAJAR (RUMUSAN) ============ -->
+    {% if ranking|length > 0 %}
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-[11px]">
+                <thead>
+                    <tr class="bg-indigo-600 text-white">
+                        <th class="px-2 py-2 text-center w-10">KDT</th>
+                        <th class="px-2 py-2 text-left">Nama Pelajar</th>
+                        <th class="px-2 py-2 text-center w-24">Kelas</th>
+                        {% for subj in subjects_short %}
+                        <th class="px-1 py-2 text-center w-10">{{ subj }}</th>
+                        {% endfor %}
+                        <th class="px-2 py-2 text-center w-14">Jum</th>
+                        <th class="px-2 py-2 text-center w-12">%</th>
+                        <th class="px-2 py-2 text-center w-12">GP</th>
+                        <th class="px-2 py-2 text-center w-16">KDK</th>
+                        <th class="px-2 py-2 text-center w-20">Analisis</th>
+                        <th class="px-2 py-2 text-left w-28">Guru Kelas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for s in ranking %}
+                <tr class="border-b hover:bg-indigo-50/30 {% if loop.index % 2 == 0 %}bg-slate-50/50{% endif %}">
+                    <td class="px-2 py-1.5 text-center font-bold text-purple-600">{{ s.kdt }}</td>
+                    <td class="px-2 py-1.5 font-medium text-slate-800">{{ s.name }}</td>
+                    <td class="px-2 py-1.5 text-center text-slate-600">{{ s.class }}</td>
+                    {% for subj_full in subjects_full %}
+                    {% set sd = s.subjects.get(subj_full, {}) %}
+                    {% set mark = sd.get('mark', '') %}
+                    {% set grade = sd.get('grade', '') %}
+                    <td class="px-1 py-1.5 text-center
+                        {% if grade in ['A+','A','A-','A'] %}text-emerald-600 font-bold
+                        {% elif grade in ['B+','B'] %}text-blue-600
+                        {% elif grade in ['E','F','G'] %}text-rose-500
+                        {% elif grade == 'TH' %}text-slate-300
+                        {% endif %}">
+                        {% if mark == 'TH' %}TH{% elif mark is number %}{{ "%.0f"|format(mark) }}{% elif mark %}{{ mark }}{% else %}-{% endif %}
+                    </td>
+                    {% endfor %}
+                    <td class="px-2 py-1.5 text-center font-bold">{% if s.jumlah_markah is number %}{{ "%.0f"|format(s.jumlah_markah) }}{% else %}{{ s.jumlah_markah or '-' }}{% endif %}</td>
+                    <td class="px-2 py-1.5 text-center">{% if s.purata is number %}{{ "%.1f"|format(s.purata) }}{% else %}-{% endif %}</td>
+                    <td class="px-2 py-1.5 text-center font-bold {% if s.gp <= 2.0 %}text-emerald-600{% elif s.gp <= 4.0 %}text-blue-600{% elif s.gp <= 6.0 %}text-amber-600{% else %}text-rose-600{% endif %}">
+                        {{ "%.2f"|format(s.gp) if s.gp < 90 else '-' }}
+                    </td>
+                    <td class="px-2 py-1.5 text-center font-bold text-indigo-600">{{ s.kdk }}</td>
+                    <td class="px-2 py-1.5 text-center text-[10px]">{{ s.analisis or '-' }}</td>
+                    <td class="px-2 py-1.5 text-[10px] text-slate-500">{{ guru_map.get(s.class, '') }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+        <p class="text-sm text-yellow-700">Tiada data kedudukan untuk Tingkatan {{ form_filter }}.</p>
+    </div>
+    {% endif %}
+
+    {% elif tab == 'analisis' %}
+    <!-- ============ ANALISIS PENCAPAIAN MENGIKUT KELAS ============ -->
+    {% if analisis_kelas|length > 0 %}
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div class="bg-slate-50 px-5 py-3 border-b">
+            <span class="text-sm font-bold text-slate-700">Analisis Pencapaian Keseluruhan Pelajar Mengikut Kelas</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+                <thead>
+                    <tr class="bg-indigo-600 text-white">
+                        <th class="px-3 py-2 text-left" rowspan="2">Kelas</th>
+                        {% for g in grade_cols %}
+                        <th class="px-2 py-1 text-center" colspan="2">{{ g }}</th>
+                        {% endfor %}
+                        <th class="px-2 py-2 text-center" rowspan="2">TH</th>
+                        <th class="px-2 py-2 text-center" rowspan="2">GPS</th>
+                    </tr>
+                    <tr class="bg-indigo-500 text-white text-[10px]">
+                        {% for g in grade_cols %}
+                        <th class="px-1 py-1 text-center">Bil</th>
+                        <th class="px-1 py-1 text-center">%</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in analisis_kelas %}
+                <tr class="border-b hover:bg-slate-50 {% if loop.index % 2 == 0 %}bg-slate-50/50{% endif %}">
+                    <td class="px-3 py-2 font-bold text-slate-800">{{ row.class }}</td>
+                    {% for g in grade_cols %}
+                    <td class="px-2 py-2 text-center font-semibold {% if g in ['A+','A','A-','A'] %}text-emerald-600{% elif g in ['E','F','G'] %}text-rose-500{% endif %}">{{ row.grades[g].count }}</td>
+                    <td class="px-2 py-2 text-center text-slate-500">{{ "%.1f"|format(row.grades[g].pct) }}%</td>
+                    {% endfor %}
+                    <td class="px-2 py-2 text-center text-slate-400">{{ row.th }}</td>
+                    <td class="px-2 py-2 text-center font-bold {% if row.gps <= 2.5 %}text-emerald-600{% elif row.gps <= 4.0 %}text-blue-600{% else %}text-amber-600{% endif %}">{{ "%.2f"|format(row.gps) }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+        <p class="text-sm text-yellow-700">Tiada data analisis untuk Tingkatan {{ form_filter }}.</p>
+    </div>
+    {% endif %}
+
+    {% elif tab == 'analisis_penuh' %}
+    <!-- ============ ANALISIS PENUH ============ -->
+    {% if analisis_penuh|length > 0 %}
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div class="bg-slate-50 px-5 py-3 border-b">
+            <span class="text-sm font-bold text-slate-700">Analisis Penuh Mengikut Kelas</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+                <thead>
+                    <tr class="bg-indigo-600 text-white">
+                        <th class="px-3 py-2 text-left">Kelas</th>
+                        <th class="px-2 py-2 text-center">Calon Daftar</th>
+                        <th class="px-2 py-2 text-center">Hadir Semua</th>
+                        <th class="px-2 py-2 text-center">Semua A (Bil)</th>
+                        <th class="px-2 py-2 text-center">Semua A (%)</th>
+                        <th class="px-2 py-2 text-center">Lulus Semua (Bil)</th>
+                        <th class="px-2 py-2 text-center">Lulus Semua (%)</th>
+                        <th class="px-2 py-2 text-center">Gagal (Bil)</th>
+                        <th class="px-2 py-2 text-center">Gagal (%)</th>
+                        <th class="px-2 py-2 text-center">GPS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in analisis_penuh %}
+                <tr class="border-b hover:bg-slate-50 {% if loop.index % 2 == 0 %}bg-slate-50/50{% endif %}">
+                    <td class="px-3 py-2 font-bold text-slate-800">{{ row.class }}</td>
+                    <td class="px-2 py-2 text-center">{{ row.total }}</td>
+                    <td class="px-2 py-2 text-center">{{ row.hadir }}</td>
+                    <td class="px-2 py-2 text-center font-bold text-emerald-600">{{ row.semua_a }}</td>
+                    <td class="px-2 py-2 text-center text-emerald-500">{{ "%.1f"|format(row.semua_a_pct) }}%</td>
+                    <td class="px-2 py-2 text-center font-bold text-blue-600">{{ row.lulus }}</td>
+                    <td class="px-2 py-2 text-center text-blue-500">{{ "%.1f"|format(row.lulus_pct) }}%</td>
+                    <td class="px-2 py-2 text-center font-bold text-rose-600">{{ row.gagal }}</td>
+                    <td class="px-2 py-2 text-center text-rose-500">{{ "%.1f"|format(row.gagal_pct) }}%</td>
+                    <td class="px-2 py-2 text-center font-bold {% if row.gps <= 2.5 %}text-emerald-600{% elif row.gps <= 4.0 %}text-blue-600{% else %}text-amber-600{% endif %}">{{ "%.2f"|format(row.gps) }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+        <p class="text-sm text-yellow-700">Tiada data analisis penuh untuk Tingkatan {{ form_filter }}.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

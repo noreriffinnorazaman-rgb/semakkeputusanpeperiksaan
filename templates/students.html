@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Senarai Pelajar - DAPA 2026{% endblock %}
+{% block content %}
+<div class="space-y-5">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-extrabold text-slate-800">Senarai Nama Murid 2026</h2>
+            <p class="text-sm text-slate-500">Semua pelajar mengikut kelas</p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <a href="/print/all-students" target="_blank" class="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700">Cetak Semua PDF</a>
+            <a href="/add-student" class="px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700">+ Tambah</a>
+        </div>
+    </div>
+
+    <div class="flex flex-wrap gap-2 mb-2">
+        <a href="/students" class="px-3 py-1.5 text-xs font-semibold rounded-lg {% if not class_filter %}bg-indigo-600 text-white{% else %}bg-white text-slate-600 border{% endif %}">Semua</a>
+        {% for cls in data.students_by_class|sort %}
+        <a href="/students?class={{ cls }}" class="px-3 py-1.5 text-xs font-semibold rounded-lg {% if class_filter == cls %}bg-indigo-600 text-white{% else %}bg-white text-slate-600 border hover:bg-indigo-50{% endif %}">{{ cls }} ({{ data.students_by_class[cls]|length }})</a>
+        {% endfor %}
+    </div>
+
+    {% if class_filter %}
+    {% set classes_to_show = {class_filter: data.students_by_class.get(class_filter, [])} %}
+    {% else %}
+    {% set classes_to_show = data.students_by_class %}
+    {% endif %}
+
+    {% set ns = namespace(grand_total=0) %}
+    {% for cls in classes_to_show|sort %}
+    {% set students_list = classes_to_show[cls] %}
+    {% set ns.grand_total = ns.grand_total + students_list|length %}
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div class="bg-slate-50 px-5 py-3 border-b flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <span class="text-sm font-bold text-slate-700">{{ cls }}</span>
+                <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full">{{ students_list|length }} pelajar</span>
+            </div>
+            <a href="/print/students/{{ cls }}" target="_blank" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Cetak PDF</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead><tr class="bg-slate-50 border-b">
+                    <th class="px-4 py-2 text-left text-xs font-bold text-slate-500 w-16">Bil</th>
+                    <th class="px-4 py-2 text-left text-xs font-bold text-slate-500">Nama Pelajar</th>
+                    <th class="px-4 py-2 text-left text-xs font-bold text-slate-500 w-32">Tingkatan</th>
+                </tr></thead>
+                <tbody>
+                {% for s in students_list %}
+                <tr class="border-b hover:bg-indigo-50/30">
+                    <td class="px-4 py-2 text-slate-500">{{ s.bil }}</td>
+                    <td class="px-4 py-2 font-medium text-slate-800">{{ s.name }}</td>
+                    <td class="px-4 py-2 text-slate-500">{{ s.form }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="bg-indigo-50 rounded-xl p-4 border border-indigo-200 text-center">
+        <span class="text-sm font-bold text-indigo-700">Jumlah Keseluruhan: {{ ns.grand_total }} pelajar dalam {{ classes_to_show|length }} kelas</span>
+    </div>
+</div>
+{% endblock %}

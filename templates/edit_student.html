@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Pelajar - SPM Examination System{% endblock %}
+
+{% block content %}
+{% if student %}
+<div class="space-y-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Edit Pelajar</h2>
+        <p class="text-gray-600">Kemaskini maklumat pelajar: {{ student.name }}</p>
+    </div>
+
+    <form id="editStudentForm" class="space-y-6">
+        <input type="hidden" name="id" value="{{ student.id }}">
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Maklumat Pelajar</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Pelajar *</label>
+                    <input type="text" name="name" value="{{ student.name }}" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas *</label>
+                    <input type="text" name="class" value="{{ student.class }}" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">No. Kad Pengenalan *</label>
+                    <input type="text" name="ic" value="{{ student.ic }}" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Keputusan Mata Pelajaran</h3>
+            <div id="subjectsContainer" class="space-y-4">
+                {% for subject in student.subjects %}
+                <div class="subject-row border border-gray-200 rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mata Pelajaran</label>
+                            <input type="text" name="subject_name[]" value="{{ subject.name }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">TOV</label>
+                            <input type="text" name="tov_grade[]" value="{{ subject.tov_grade }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">U1</label>
+                            <input type="text" name="u1_grade[]" value="{{ subject.u1_grade }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">PPT</label>
+                            <input type="text" name="ppt_grade[]" value="{{ subject.ppt_grade }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">SPMC</label>
+                            <input type="text" name="spmc_grade[]" value="{{ subject.spmc_grade }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ETR</label>
+                            <input type="text" name="etr_grade[]" value="{{ subject.etr_grade }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-4">
+            <a href="/student/{{ student.id }}" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                Batal
+            </a>
+            <button type="submit" class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                Simpan Perubahan
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('editStudentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const subjects = [];
+    
+    const subjectNames = formData.getAll('subject_name[]');
+    const tovGrades = formData.getAll('tov_grade[]');
+    const u1Grades = formData.getAll('u1_grade[]');
+    const pptGrades = formData.getAll('ppt_grade[]');
+    const spmcGrades = formData.getAll('spmc_grade[]');
+    const etrGrades = formData.getAll('etr_grade[]');
+    
+    for (let i = 0; i < subjectNames.length; i++) {
+        subjects.push({
+            name: subjectNames[i],
+            tov_grade: tovGrades[i],
+            u1_grade: u1Grades[i],
+            ppt_grade: pptGrades[i],
+            spmc_grade: spmcGrades[i],
+            etr_grade: etrGrades[i]
+        });
+    }
+    
+    const studentData = {
+        id: {{ student.id }},
+        name: formData.get('name'),
+        class: formData.get('class'),
+        ic: formData.get('ic'),
+        subjects: subjects,
+        total_subjects: subjects.length
+    };
+    
+    try {
+        const response = await fetch('/edit-student/{{ student.id }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(studentData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Pelajar berjaya dikemaskini!');
+            window.location.href = '/student/{{ student.id }}';
+        } else {
+            alert('Ralat: Gagal mengemaskini pelajar');
+        }
+    } catch (error) {
+        alert('Ralat: ' + error.message);
+    }
+});
+</script>
+{% else %}
+<div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg">
+    <p class="text-red-700">Pelajar tidak dijumpai.</p>
+    <a href="/students" class="mt-4 inline-block px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Kembali</a>
+</div>
+{% endif %}
+{% endblock %}

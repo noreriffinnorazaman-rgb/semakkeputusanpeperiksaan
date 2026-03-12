@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Slip Peperiksaan - DAPA 2026{% endblock %}
+{% block content %}
+<div class="space-y-5">
+    <div>
+        <h2 class="text-xl font-extrabold text-slate-800">Slip Peperiksaan</h2>
+        <p class="text-sm text-slate-500">Pilih peperiksaan, tingkatan dan kelas untuk lihat atau cetak slip peperiksaan</p>
+    </div>
+
+    <!-- Exam selector -->
+    <div class="flex flex-wrap gap-2">
+        <span class="px-3 py-2 text-xs font-bold text-slate-400 uppercase">Peperiksaan:</span>
+        {% for ex in exams %}
+        <a href="/slip-peperiksaan?exam={{ ex }}&form={{ form_filter }}" class="px-4 py-2 text-sm font-bold rounded-lg {% if exam_filter == ex %}bg-emerald-600 text-white{% else %}bg-white text-slate-600 border hover:bg-emerald-50{% endif %}">{{ exam_labels.get(ex, ex) }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- Form selector -->
+    <div class="flex flex-wrap gap-2">
+        <span class="px-3 py-2 text-xs font-bold text-slate-400 uppercase">Tingkatan:</span>
+        {% for f in ['1','2','3','4','5'] %}
+        <a href="/slip-peperiksaan?form={{ f }}&exam={{ exam_filter }}" class="px-5 py-2 text-sm font-bold rounded-lg {% if form_filter == f %}bg-indigo-600 text-white{% else %}bg-white text-slate-600 border hover:bg-indigo-50{% endif %}">Tingkatan {{ f }}</a>
+        {% endfor %}
+    </div>
+
+    {% set form_classes = classes.get(form_filter, []) %}
+    {% if form_classes %}
+    {% for cls in form_classes %}
+    {% set students = data.uat_data.get(cls, []) %}
+    {% set guru = data.guru_kelas.get(cls, '') %}
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div class="bg-slate-50 px-5 py-3 border-b flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <span class="text-sm font-bold text-slate-700">{{ cls }}</span>
+                <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full">{{ students|length }} pelajar</span>
+                {% if guru %}
+                <span class="text-xs text-slate-400">Guru Kelas: <b class="text-slate-600">{{ guru }}</b></span>
+                {% endif %}
+            </div>
+            <a href="/print/slip-class/{{ cls }}?exam={{ exam_filter }}" target="_blank" class="px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700">Cetak Semua Slip PDF</a>
+        </div>
+        <table class="w-full text-xs">
+            <thead><tr class="bg-slate-50 border-b">
+                <th class="px-3 py-2 text-left font-bold text-slate-500 w-10">Bil</th>
+                <th class="px-3 py-2 text-left font-bold text-slate-500">Nama Pelajar</th>
+                <th class="px-3 py-2 text-center font-bold text-slate-500 w-16">GP</th>
+                <th class="px-3 py-2 text-center font-bold text-slate-500 w-20">KDK</th>
+                <th class="px-3 py-2 text-center font-bold text-slate-500 w-20">KDT</th>
+                <th class="px-3 py-2 text-center font-bold text-slate-500 w-16">Purata</th>
+                <th class="px-3 py-2 text-center font-bold text-slate-500 w-24">Keputusan</th>
+                <th class="px-3 py-2 text-center font-bold text-slate-500 w-36">Tindakan</th>
+            </tr></thead>
+            <tbody>
+            {% for s in students|sort(attribute='kdk_rank') %}
+            <tr class="border-b hover:bg-indigo-50/30">
+                <td class="px-3 py-2 text-slate-400">{{ loop.index }}</td>
+                <td class="px-3 py-2 font-medium text-slate-800">{{ s.name }}</td>
+                <td class="px-3 py-2 text-center font-bold {% if s.gp <= 2.0 %}text-emerald-600{% elif s.gp <= 4.0 %}text-blue-600{% elif s.gp <= 6.0 %}text-amber-600{% else %}text-rose-600{% endif %}">
+                    {{ "%.2f"|format(s.gp) if s.gp < 90 else '-' }}
+                </td>
+                <td class="px-3 py-2 text-center font-bold text-indigo-600">{{ s.kdk }}</td>
+                <td class="px-3 py-2 text-center font-bold text-purple-600">{{ s.kdt }}</td>
+                <td class="px-3 py-2 text-center">{{ "%.1f"|format(s.purata) if s.purata is number else s.purata }}</td>
+                <td class="px-3 py-2 text-center">
+                    {% if s.keputusan == 'LULUS' or s.keputusan == 'LS' %}
+                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">{{ s.keputusan }}</span>
+                    {% elif s.keputusan %}
+                    <span class="px-2 py-0.5 bg-rose-100 text-rose-700 text-[10px] font-bold rounded-full">{{ s.keputusan }}</span>
+                    {% else %}-{% endif %}
+                </td>
+                <td class="px-3 py-2 text-center space-x-2">
+                    <a href="/slip-peperiksaan/{{ cls }}/{{ s._orig_idx }}?exam={{ exam_filter }}" class="text-indigo-600 hover:text-indigo-800 font-semibold">Lihat</a>
+                    <a href="/print/slip/{{ cls }}/{{ s._orig_idx }}?exam={{ exam_filter }}" target="_blank" class="text-emerald-600 hover:text-emerald-800 font-semibold">PDF</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+        <p class="text-sm text-yellow-700">Tiada data untuk Tingkatan {{ form_filter }}.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

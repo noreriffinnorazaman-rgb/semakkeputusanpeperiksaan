@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Slip Peperiksaan {{ student.name }} - DAPA 2026{% endblock %}
+{% block content %}
+<div class="space-y-5">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-extrabold text-slate-800">Slip Peperiksaan</h2>
+            <p class="text-sm text-slate-500">{{ exam_label }} 2026</p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <a href="/slip-peperiksaan?form={{ class_name.split(' ')[0] }}&exam={{ exam_filter }}" class="px-4 py-2 text-sm border rounded-lg hover:bg-slate-50">Kembali</a>
+            <a href="/print/slip/{{ class_name }}/{{ student_idx }}?exam={{ exam_filter }}" target="_blank" class="px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">Cetak PDF</a>
+        </div>
+    </div>
+
+    <!-- Student Info Card -->
+    <div class="bg-white rounded-xl shadow-sm border p-5">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Nama Pelajar</p>
+                <p class="text-sm font-bold text-slate-800">{{ student.name }}</p>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Kelas</p>
+                <p class="text-sm font-bold text-slate-800">{{ class_name }}</p>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Guru Kelas</p>
+                <p class="text-sm font-semibold text-slate-700">{{ guru_kelas }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rankings Card -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-4 text-white">
+            <p class="text-[10px] font-bold uppercase opacity-80">Gred Purata (GP)</p>
+            <p class="text-2xl font-extrabold mt-1">{{ "%.2f"|format(student.gp) if student.gp < 90 else '-' }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-white">
+            <p class="text-[10px] font-bold uppercase opacity-80">Kedudukan Dalam Kelas</p>
+            <p class="text-2xl font-extrabold mt-1">{{ student.kdk }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white">
+            <p class="text-[10px] font-bold uppercase opacity-80">Kedudukan Dalam Tingkatan</p>
+            <p class="text-2xl font-extrabold mt-1">{{ student.kdt }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 text-white">
+            <p class="text-[10px] font-bold uppercase opacity-80">Keputusan</p>
+            <p class="text-2xl font-extrabold mt-1">{{ student.keputusan or '-' }}</p>
+        </div>
+    </div>
+
+    <!-- Subjects Table -->
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+                <thead>
+                    <tr class="bg-indigo-600 text-white">
+                        <th class="px-3 py-2.5 text-left w-10">Bil</th>
+                        <th class="px-3 py-2.5 text-left">Mata Pelajaran</th>
+                        <th class="px-3 py-2.5 text-center w-20">Markah</th>
+                        <th class="px-3 py-2.5 text-center w-16">Gred</th>
+                        <th class="px-3 py-2.5 text-left">Taksiran Gred</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% set bil = namespace(n=0) %}
+                {% for subj_name in student.subject_order %}
+                {% set sd = student.subjects.get(subj_name, {}) %}
+                {% if sd.mark != '' or sd.grade != '' %}
+                {% set bil.n = bil.n + 1 %}
+                <tr class="border-b hover:bg-slate-50 {% if loop.index % 2 == 0 %}bg-slate-50/50{% endif %}">
+                    <td class="px-3 py-2.5 text-slate-400">{{ bil.n }}</td>
+                    <td class="px-3 py-2.5 font-medium text-slate-800">{{ subj_name }}</td>
+                    <td class="px-3 py-2.5 text-center font-bold text-slate-700">
+                        {% if sd.mark == 'TH' %}
+                        <span class="text-slate-400">TH</span>
+                        {% elif sd.mark is number %}{{ "%.0f"|format(sd.mark) }}{% else %}{{ sd.mark }}{% endif %}
+                    </td>
+                    <td class="px-3 py-2.5 text-center font-bold
+                        {% if sd.grade in ['A+','A','A-'] %}text-emerald-600
+                        {% elif sd.grade in ['B+','B'] %}text-blue-600
+                        {% elif sd.grade in ['C+','C'] %}text-amber-600
+                        {% elif sd.grade == 'D' %}text-orange-600
+                        {% elif sd.grade in ['E','F','G'] %}text-rose-600
+                        {% elif sd.grade == 'TH' %}text-slate-400
+                        {% endif %}">{{ sd.grade }}</td>
+                    <td class="px-3 py-2.5 text-slate-600">{{ sd.taksiran or taksiran.get(sd.grade, '') }}</td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div class="bg-slate-50 px-5 py-3 border-b">
+            <span class="text-sm font-bold text-slate-700">Rumusan</span>
+        </div>
+        <div class="p-5">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Jumlah Markah</p>
+                    <p class="font-bold text-slate-800">
+                        {% if student.jumlah_markah is number %}{{ "%.0f"|format(student.jumlah_markah) }}{% else %}{{ student.jumlah_markah or '-' }}{% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Purata</p>
+                    <p class="font-bold text-slate-800">
+                        {% if student.purata is number %}{{ "%.2f"|format(student.purata) }}{% else %}{{ student.purata or '-' }}{% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Analisis</p>
+                    <p class="font-semibold text-slate-700">{{ student.analisis or '-' }}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Bilangan Mata Pelajaran</p>
+                    <p class="font-bold text-slate-800">{{ student.bil_subjects }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ulasan -->
+    {% if student.ulasan %}
+    <div class="bg-white rounded-xl shadow-sm border p-5">
+        <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Ulasan Guru Kelas</p>
+        <p class="text-sm text-slate-700 italic">"{{ student.ulasan }}"</p>
+    </div>
+    {% endif %}
+
+    <!-- Navigation -->
+    <div class="flex items-center justify-between">
+        {% if student_idx > 0 %}
+        <a href="/slip-peperiksaan/{{ class_name }}/{{ student_idx - 1 }}?exam={{ exam_filter }}" class="px-4 py-2 text-sm border rounded-lg hover:bg-slate-50">&#8592; Pelajar Sebelum</a>
+        {% else %}<div></div>{% endif %}
+        {% if student_idx < total_students - 1 %}
+        <a href="/slip-peperiksaan/{{ class_name }}/{{ student_idx + 1 }}?exam={{ exam_filter }}" class="px-4 py-2 text-sm border rounded-lg hover:bg-slate-50">Pelajar Seterusnya &#8594;</a>
+        {% else %}<div></div>{% endif %}
+    </div>
+</div>
+{% endblock %}

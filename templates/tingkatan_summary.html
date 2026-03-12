@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Rumusan Tingkatan - DAPA 2026{% endblock %}
+{% block content %}
+<div class="space-y-5">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-extrabold text-slate-800">Rumusan Tingkatan {{ form_filter }}</h2>
+            <p class="text-sm text-slate-500">Analisis prestasi mengikut kelas dan mata pelajaran</p>
+        </div>
+        <a href="/print/tingkatan-summary/{{ form_filter }}/{{ exam_filter }}" target="_blank" class="px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">Cetak PDF</a>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+        {% for f in ['1','2','3','4','5'] %}
+        <a href="/tingkatan-summary?form={{ f }}&exam={{ exam_filter }}" class="px-5 py-2 text-sm font-bold rounded-lg {% if form_filter == f|string %}bg-indigo-600 text-white{% else %}bg-white text-slate-600 border hover:bg-indigo-50{% endif %}">Tingkatan {{ f }}</a>
+        {% endfor %}
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+        {% for ex in exams %}
+        <a href="/tingkatan-summary?form={{ form_filter }}&exam={{ ex }}" class="px-4 py-1.5 text-xs font-bold rounded-lg {% if exam_filter == ex %}bg-emerald-600 text-white{% else %}bg-white text-slate-600 border hover:bg-emerald-50{% endif %}">{{ ex }}</a>
+        {% endfor %}
+    </div>
+
+    {% if summary|length == 0 %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+        <p class="text-sm text-yellow-700">Tiada data untuk Tingkatan {{ form_filter }}.</p>
+    </div>
+    {% endif %}
+
+    {% for cls_data in summary %}
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div class="bg-slate-50 px-5 py-3 border-b flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <span class="text-sm font-bold text-slate-700">{{ cls_data.class_name }}</span>
+                <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full">{{ cls_data.total_students }} pelajar</span>
+            </div>
+            <span class="text-xs text-slate-400">Peperiksaan: {{ exam_filter }}</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+                <thead><tr class="bg-indigo-600 text-white">
+                    <th class="px-3 py-2 text-left">Bil</th>
+                    <th class="px-3 py-2 text-left">Mata Pelajaran</th>
+                    <th class="px-3 py-2 text-center">Bil Calon</th>
+                    <th class="px-3 py-2 text-center">Purata</th>
+                    <th class="px-3 py-2 text-center">Tertinggi</th>
+                    <th class="px-3 py-2 text-center">Terendah</th>
+                    <th class="px-3 py-2 text-center">Lulus</th>
+                    <th class="px-3 py-2 text-center">% Lulus</th>
+                    <th class="px-3 py-2 text-center">A+</th>
+                    <th class="px-3 py-2 text-center">A</th>
+                    <th class="px-3 py-2 text-center">A-</th>
+                    <th class="px-3 py-2 text-center">B+</th>
+                    <th class="px-3 py-2 text-center">B</th>
+                    <th class="px-3 py-2 text-center">C+</th>
+                    <th class="px-3 py-2 text-center">C</th>
+                    <th class="px-3 py-2 text-center">D</th>
+                    <th class="px-3 py-2 text-center">E</th>
+                    <th class="px-3 py-2 text-center">G</th>
+                </tr></thead>
+                <tbody>
+                {% for subj in cls_data.subjects %}
+                <tr class="border-b hover:bg-slate-50">
+                    <td class="px-3 py-2 text-slate-500">{{ loop.index }}</td>
+                    <td class="px-3 py-2 font-medium text-slate-800">{{ subj.name }}</td>
+                    <td class="px-3 py-2 text-center">{{ subj.count }}</td>
+                    <td class="px-3 py-2 text-center font-bold {% if subj.avg >= 70 %}text-emerald-600{% elif subj.avg >= 50 %}text-blue-600{% elif subj.avg >= 40 %}text-amber-600{% else %}text-rose-600{% endif %}">{{ "%.1f"|format(subj.avg) }}</td>
+                    <td class="px-3 py-2 text-center text-emerald-600 font-semibold">{{ "%.0f"|format(subj.highest) }}</td>
+                    <td class="px-3 py-2 text-center text-rose-600 font-semibold">{{ "%.0f"|format(subj.lowest) }}</td>
+                    <td class="px-3 py-2 text-center font-bold">{{ subj.lulus }}</td>
+                    <td class="px-3 py-2 text-center">
+                        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold {% if subj.lulus_pct >= 80 %}bg-emerald-100 text-emerald-700{% elif subj.lulus_pct >= 60 %}bg-blue-100 text-blue-700{% elif subj.lulus_pct >= 40 %}bg-amber-100 text-amber-700{% else %}bg-rose-100 text-rose-700{% endif %}">{{ "%.1f"|format(subj.lulus_pct) }}%</span>
+                    </td>
+                    {% for g in ['A+','A','A-','B+','B','C+','C','D','E','G'] %}
+                    <td class="px-2 py-2 text-center {% if g in ['A+','A','A-'] and subj.grade_dist.get(g, 0) > 0 %}text-emerald-600 font-bold{% elif g in ['E','G'] and subj.grade_dist.get(g, 0) > 0 %}text-rose-600 font-bold{% endif %}">{{ subj.grade_dist.get(g, 0) or '' }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% if summary|length > 1 %}
+    <div class="bg-white rounded-xl shadow-sm border p-5">
+        <h3 class="text-sm font-bold text-slate-700 uppercase mb-3">Perbandingan Kelas - Purata Mengikut Mata Pelajaran ({{ exam_filter }})</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+                <thead><tr class="bg-slate-100">
+                    <th class="px-3 py-2 text-left">Mata Pelajaran</th>
+                    {% for cls_data in summary %}
+                    <th class="px-3 py-2 text-center">{{ cls_data.class_name }}</th>
+                    {% endfor %}
+                </tr></thead>
+                <tbody>
+                {% for subj_name in all_subjects %}
+                <tr class="border-b hover:bg-slate-50">
+                    <td class="px-3 py-2 font-medium">{{ subj_name }}</td>
+                    {% for cls_data in summary %}
+                    {% set found = namespace(avg=0, has=false) %}
+                    {% for s in cls_data.subjects %}
+                    {% if s.name == subj_name %}{% set found.avg = s.avg %}{% set found.has = true %}{% endif %}
+                    {% endfor %}
+                    <td class="px-3 py-2 text-center font-bold {% if found.has %}{% if found.avg >= 70 %}text-emerald-600{% elif found.avg >= 50 %}text-blue-600{% elif found.avg >= 40 %}text-amber-600{% else %}text-rose-600{% endif %}{% endif %}">
+                        {% if found.has %}{{ "%.1f"|format(found.avg) }}{% else %}-{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

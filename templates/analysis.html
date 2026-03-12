@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Analisis - DAPA 2026{% endblock %}
+{% block content %}
+<div class="space-y-5">
+    <div>
+        <h2 class="text-xl font-extrabold text-slate-800">Analisis KPI & Headcount</h2>
+        <p class="text-sm text-slate-500">Analisis prestasi mata pelajaran</p>
+    </div>
+
+    {% if data.analysis_kpi %}
+    <div class="bg-white rounded-xl shadow-sm border p-5 overflow-x-auto">
+        <h3 class="text-sm font-bold text-slate-700 uppercase mb-3">Analisis KPI Mata Pelajaran</h3>
+        <table class="w-full text-xs">
+            <thead><tr class="bg-indigo-600 text-white">
+                <th class="px-2 py-2 text-left">Bil</th>
+                <th class="px-2 py-2 text-left">Mata Pelajaran</th>
+                <th class="px-2 py-2 text-center">2023 Cln</th>
+                <th class="px-2 py-2 text-center">2023 A</th>
+                <th class="px-2 py-2 text-center">2023 %</th>
+                <th class="px-2 py-2 text-center">2024 Cln</th>
+                <th class="px-2 py-2 text-center">2024 A</th>
+                <th class="px-2 py-2 text-center">2024 %</th>
+                <th class="px-2 py-2 text-center">2025 Cln</th>
+                <th class="px-2 py-2 text-center">2025 A</th>
+                <th class="px-2 py-2 text-center">2025 %</th>
+                <th class="px-2 py-2 text-center">ETR Cln</th>
+                <th class="px-2 py-2 text-center">ETR A</th>
+                <th class="px-2 py-2 text-center">ETR %</th>
+            </tr></thead>
+            <tbody>
+            {% for entry in data.analysis_kpi %}
+            <tr class="border-b hover:bg-slate-50 {% if entry.bil == 'SUBTOTAL' %}bg-indigo-50 font-bold{% endif %}">
+                <td class="px-2 py-1.5">{{ entry.bil or '' }}</td>
+                <td class="px-2 py-1.5 {% if entry.bil == 'SUBTOTAL' %}font-bold text-indigo-700{% endif %}">{{ entry.subject or '' }}</td>
+                <td class="px-2 py-1.5 text-center">{{ entry['2023_cln'] or '' }}</td>
+                <td class="px-2 py-1.5 text-center font-semibold text-emerald-600">{{ entry['2023_a'] or '' }}</td>
+                <td class="px-2 py-1.5 text-center">{% if entry['2023_pct'] %}{{ "%.1f"|format(entry['2023_pct']|float) }}{% endif %}</td>
+                <td class="px-2 py-1.5 text-center">{{ entry['2024_cln'] or '' }}</td>
+                <td class="px-2 py-1.5 text-center font-semibold text-emerald-600">{{ entry['2024_a'] or '' }}</td>
+                <td class="px-2 py-1.5 text-center">{% if entry['2024_pct'] %}{{ "%.1f"|format(entry['2024_pct']|float) }}{% endif %}</td>
+                <td class="px-2 py-1.5 text-center">{{ entry['2025_cln'] or '' }}</td>
+                <td class="px-2 py-1.5 text-center font-semibold text-emerald-600">{{ entry['2025_a'] or '' }}</td>
+                <td class="px-2 py-1.5 text-center">{% if entry['2025_pct'] %}{{ "%.1f"|format(entry['2025_pct']|float) }}{% endif %}</td>
+                <td class="px-2 py-1.5 text-center">{{ entry.etr_cln or '' }}</td>
+                <td class="px-2 py-1.5 text-center font-semibold text-blue-600">{{ entry.etr_a or '' }}</td>
+                <td class="px-2 py-1.5 text-center">{% if entry.etr_pct %}{{ "%.1f"|format(entry.etr_pct|float) }}{% endif %}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if data.analysis_hc %}
+    <div class="bg-white rounded-xl shadow-sm border p-5 overflow-x-auto">
+        <h3 class="text-sm font-bold text-slate-700 uppercase mb-3">Analisis HC Mata Pelajaran</h3>
+        <table class="w-full text-xs">
+            <thead><tr class="bg-emerald-600 text-white">
+                <th class="px-2 py-2 text-left">Bil</th>
+                <th class="px-2 py-2 text-left">Mata Pelajaran</th>
+                <th class="px-2 py-2 text-center">A TOV</th>
+                <th class="px-2 py-2 text-center">% TOV</th>
+                <th class="px-2 py-2 text-center">A U1</th>
+                <th class="px-2 py-2 text-center">% U1</th>
+                <th class="px-2 py-2 text-center">A PPT</th>
+                <th class="px-2 py-2 text-center">% PPT</th>
+                <th class="px-2 py-2 text-center">A SPMC</th>
+                <th class="px-2 py-2 text-center">% SPMC</th>
+                <th class="px-2 py-2 text-center">A ETR</th>
+                <th class="px-2 py-2 text-center">% ETR</th>
+                <th class="px-2 py-2 text-center">GPMP</th>
+            </tr></thead>
+            <tbody>
+            {% for entry in data.analysis_hc %}
+            <tr class="border-b hover:bg-slate-50">
+                <td class="px-2 py-1.5">{{ entry.bil or '' }}</td>
+                <td class="px-2 py-1.5 font-medium">{{ entry.subject or '' }}</td>
+                <td class="px-2 py-1.5 text-center font-semibold text-emerald-600">{{ entry.a_tov_bil or '' }}</td>
+                <td class="px-2 py-1.5 text-center">{% if entry.a_tov_pct %}{{ "%.1f"|format(entry.a_tov_pct|float) }}{% endif %}</td>
+                <td class="px-2 py-1.5 text-center font-semibold text-emerald-600">{{ entry.a_u1_bil or '' }}</td>
+                <td class="px-2 py-1.5 text-center">{% if entry.a_u1_pct %}{{ "%.1f"|format(entry.a_u1_pct|float) }}{% endif %}</td>
+                <td class="px-2 py-1.5 text-center font-semibold text-emerald-600">{{ entry.a_ppt_bil or '' }}</td>
+                <td class="px-2 py-1.5 text-center">{% if entry.a_ppt_pct %}{{ "%.1f"|format(entry.a_ppt_pct|float) }}{% endif %}</td>
+                <td class="px-2 py-1.5 text-center font-semibold text-emerald-600">{{ entry.a_spmc_bil or '' }}</td>
+                <td class="px-2 py-1.5 text-center">{% if entry.a_spmc_pct %}{{ "%.1f"|format(entry.a_spmc_pct|float) }}{% endif %}</td>
+                <td class="px-2 py-1.5 text-center font-semibold text-blue-600">{{ entry.a_etr_bil or '' }}</td>
+                <td class="px-2 py-1.5 text-center">{% if entry.a_etr_pct %}{{ "%.1f"|format(entry.a_etr_pct|float) }}{% endif %}</td>
+                <td class="px-2 py-1.5 text-center font-bold">{% if entry.gpmp %}{{ "%.2f"|format(entry.gpmp|float) }}{% endif %}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if data.hc_by_exam %}
+    <div class="bg-white rounded-xl shadow-sm border p-5">
+        <h3 class="text-sm font-bold text-slate-700 uppercase mb-3">HC Mengikut Peperiksaan</h3>
+        <div class="flex flex-wrap gap-2 mb-4" id="exam-tabs">
+            {% for exam_name in data.hc_by_exam %}
+            <button onclick="showExam('{{ exam_name }}')" class="exam-tab px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-slate-600 border hover:bg-indigo-50" data-exam="{{ exam_name }}">{{ exam_name }}</button>
+            {% endfor %}
+        </div>
+        {% for exam_name, subjects in data.hc_by_exam.items() %}
+        <div class="exam-content hidden overflow-x-auto" id="exam-{{ exam_name }}">
+            <table class="w-full text-xs">
+                <thead><tr class="bg-slate-100">
+                    <th class="px-2 py-2 text-left">Kod</th>
+                    <th class="px-2 py-2 text-left">Mata Pelajaran</th>
+                    <th class="px-2 py-2 text-center">Daftar</th>
+                    <th class="px-2 py-2 text-center">Ambil</th>
+                    <th class="px-2 py-2 text-center">A+</th>
+                    <th class="px-2 py-2 text-center">A</th>
+                    <th class="px-2 py-2 text-center">A-</th>
+                    <th class="px-2 py-2 text-center">Semua A</th>
+                    <th class="px-2 py-2 text-center">B+</th>
+                    <th class="px-2 py-2 text-center">B</th>
+                    <th class="px-2 py-2 text-center">C+</th>
+                    <th class="px-2 py-2 text-center">C</th>
+                    <th class="px-2 py-2 text-center">D</th>
+                    <th class="px-2 py-2 text-center">E</th>
+                </tr></thead>
+                <tbody>
+                {% for s in subjects %}
+                <tr class="border-b hover:bg-slate-50">
+                    <td class="px-2 py-1.5 font-mono text-slate-500">{{ s.code or '' }}</td>
+                    <td class="px-2 py-1.5 font-medium">{{ s.name or '' }}</td>
+                    <td class="px-2 py-1.5 text-center">{{ s.calon_daftar or '' }}</td>
+                    <td class="px-2 py-1.5 text-center">{{ s.calon_ambil or '' }}</td>
+                    {% for g in ['A+','A','A-'] %}
+                    <td class="px-2 py-1.5 text-center">{{ s.grades.get(g, '') or '' }}</td>
+                    {% endfor %}
+                    <td class="px-2 py-1.5 text-center font-bold text-emerald-600">{{ s.semua_a or '' }}</td>
+                    {% for g in ['B+','B','C+','C','D','E'] %}
+                    <td class="px-2 py-1.5 text-center">{{ s.grades.get(g, '') or '' }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function showExam(name) {
+    document.querySelectorAll('.exam-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.exam-tab').forEach(el => {
+        el.classList.remove('bg-indigo-600', 'text-white');
+        el.classList.add('bg-white', 'text-slate-600');
+    });
+    const content = document.getElementById('exam-' + name);
+    if (content) content.classList.remove('hidden');
+    const tab = document.querySelector('[data-exam="' + name + '"]');
+    if (tab) { tab.classList.remove('bg-white', 'text-slate-600'); tab.classList.add('bg-indigo-600', 'text-white'); }
+}
+// Show first exam by default
+const firstTab = document.querySelector('.exam-tab');
+if (firstTab) showExam(firstTab.dataset.exam);
+</script>
+{% endblock %}

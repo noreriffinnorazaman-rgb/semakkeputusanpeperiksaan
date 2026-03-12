@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Kemasukan Markah - DAPA 2026{% endblock %}
+{% block content %}
+<div class="space-y-5">
+    <div>
+        <h2 class="text-xl font-extrabold text-slate-800">Kemasukan Markah</h2>
+        <p class="text-sm text-slate-500">Pilih tingkatan, peperiksaan dan kelas untuk memasukkan markah pelajar</p>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+        <span class="px-3 py-2 text-xs font-bold text-slate-400 uppercase">Tingkatan:</span>
+        {% for f in ['1','2','3','4','5'] %}
+        <a href="/marks?form={{ f }}&exam={{ exam_filter }}" class="px-5 py-2 text-sm font-bold rounded-lg {% if form_filter == f %}bg-indigo-600 text-white{% else %}bg-white text-slate-600 border hover:bg-indigo-50{% endif %}">Tingkatan {{ f }}</a>
+        {% endfor %}
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+        <span class="px-3 py-2 text-xs font-bold text-slate-400 uppercase">Peperiksaan:</span>
+        {% for ex in exams %}
+        <a href="/marks?form={{ form_filter }}&exam={{ ex }}" class="px-4 py-2 text-sm font-bold rounded-lg {% if exam_filter == ex %}bg-emerald-600 text-white{% else %}bg-white text-slate-600 border hover:bg-emerald-50{% endif %}">{{ exam_labels.get(ex, ex) }}</a>
+        {% endfor %}
+    </div>
+
+    {% set form_classes = classes.get(form_filter, []) %}
+    {% if form_classes %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for cls in form_classes %}
+        {% set uat_students = data.uat_data.get(cls, []) %}
+        <div class="bg-white rounded-xl shadow-sm border overflow-hidden card-hover">
+            <div class="p-5">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-bold text-slate-800">{{ cls }}</h3>
+                    <span class="px-2.5 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full">{{ uat_students|length }} pelajar</span>
+                </div>
+                <a href="/marks/entry/{{ cls }}?exam={{ exam_filter }}" class="block w-full text-center px-4 py-2.5 text-sm font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
+                    Masuk Markah {{ exam_labels.get(exam_filter, exam_filter) }}
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+        <p class="text-sm text-yellow-700">Tiada kelas untuk Tingkatan {{ form_filter }}.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

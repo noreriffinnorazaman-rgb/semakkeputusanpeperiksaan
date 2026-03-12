@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.xlsx
+*.xlsm
+*.exe
+*.txt
+!requirements.txt
+~$*
+.env
+venv/

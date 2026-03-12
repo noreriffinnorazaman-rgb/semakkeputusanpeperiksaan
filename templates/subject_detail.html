@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ subject.name if subject else 'Mata Pelajaran' }} - DAPA 2026{% endblock %}
+{% block content %}
+{% if subject %}
+<div class="space-y-5">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-extrabold text-slate-800">{{ subject.name }}</h2>
+            <p class="text-sm text-slate-500">{{ subject.sheet }} | {{ category|upper }}</p>
+        </div>
+        <a href="/subjects#{{ category }}" class="px-4 py-2 text-sm border rounded-lg hover:bg-slate-50">Kembali</a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border p-5 overflow-x-auto">
+        <h3 class="text-sm font-bold text-slate-700 uppercase mb-3">Headcount Mengikut Peperiksaan</h3>
+        <table class="w-full text-xs">
+            <thead><tr class="bg-indigo-600 text-white">
+                <th class="px-2 py-2 text-left">Peperiksaan</th>
+                <th class="px-2 py-2 text-center">Daftar</th>
+                <th class="px-2 py-2 text-center">Ambil</th>
+                <th class="px-2 py-2 text-center">A+</th>
+                <th class="px-2 py-2 text-center">A</th>
+                <th class="px-2 py-2 text-center">A-</th>
+                <th class="px-2 py-2 text-center">Semua A</th>
+                <th class="px-2 py-2 text-center">B+</th>
+                <th class="px-2 py-2 text-center">B</th>
+                <th class="px-2 py-2 text-center">C+</th>
+                <th class="px-2 py-2 text-center">C</th>
+                <th class="px-2 py-2 text-center">D</th>
+                <th class="px-2 py-2 text-center">E</th>
+                <th class="px-2 py-2 text-center">Lulus</th>
+                <th class="px-2 py-2 text-center">GPMP</th>
+            </tr></thead>
+            <tbody>
+            {% for exam in ['TOV','OTI1','U1','OTI2','PPT','OTI3','SPMC','ETR','2025','2024','2023'] %}
+            {% set e = subject.exams.get(exam, {}) %}
+            {% if e and (e.calon_daftar or e.calon_ambil) %}
+            <tr class="border-b hover:bg-slate-50 {% if exam in ['2025','2024','2023'] %}bg-amber-50{% endif %}">
+                <td class="px-2 py-2 font-bold">{{ exam }}</td>
+                <td class="px-2 py-2 text-center">{{ e.calon_daftar or '' }}</td>
+                <td class="px-2 py-2 text-center">{{ e.calon_ambil or '' }}</td>
+                {% for g in ['A+','A','A-'] %}
+                <td class="px-2 py-2 text-center">{{ e.grades.get(g, '') or '' }}</td>
+                {% endfor %}
+                <td class="px-2 py-2 text-center font-bold text-emerald-600">{{ e.semua_a or '' }}</td>
+                {% for g in ['B+','B','C+','C','D','E'] %}
+                <td class="px-2 py-2 text-center">{{ e.grades.get(g, '') or '' }}</td>
+                {% endfor %}
+                <td class="px-2 py-2 text-center font-bold text-blue-600">{{ e.lulus_bil or '' }}</td>
+                <td class="px-2 py-2 text-center font-bold">{% if e.gpmp %}{{ "%.3f"|format(e.gpmp|float) }}{% endif %}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg">
+    <h3 class="font-semibold text-red-800">Mata Pelajaran Tidak Dijumpai</h3>
+    <a href="/subjects" class="mt-3 inline-block px-4 py-2 bg-red-600 text-white rounded-lg text-sm">Kembali</a>
+</div>
+{% endif %}
+{% endblock %}

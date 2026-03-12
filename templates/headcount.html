@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Headcount Tingkatan {{ form_filter }} - DAPA 2026{% endblock %}
+{% block content %}
+<div class="space-y-5">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-extrabold text-slate-800">Headcount Mata Pelajaran — Tingkatan {{ form_filter }}</h2>
+            <p class="text-sm text-slate-500">{{ exam_label }} 2026 — Analisis gred mengikut mata pelajaran &amp; kelas</p>
+        </div>
+        <a href="/print/headcount?form={{ form_filter }}&exam={{ exam_filter }}" target="_blank" class="px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">Cetak PDF</a>
+    </div>
+
+    <!-- Exam selector -->
+    <div class="flex flex-wrap gap-2">
+        <span class="px-3 py-2 text-xs font-bold text-slate-400 uppercase">Peperiksaan:</span>
+        {% for ex in exams %}
+        <a href="/headcount?exam={{ ex }}&form={{ form_filter }}" class="px-4 py-2 text-sm font-bold rounded-lg {% if exam_filter == ex %}bg-emerald-600 text-white{% else %}bg-white text-slate-600 border hover:bg-emerald-50{% endif %}">{{ exam_labels.get(ex, ex) }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- Form selector -->
+    <div class="flex flex-wrap gap-2">
+        <span class="px-3 py-2 text-xs font-bold text-slate-400 uppercase">Tingkatan:</span>
+        {% for f in ['1','2','3','4','5'] %}
+        <a href="/headcount?form={{ f }}&exam={{ exam_filter }}" class="px-5 py-2 text-sm font-bold rounded-lg {% if form_filter == f|string %}bg-indigo-600 text-white{% else %}bg-white text-slate-600 border hover:bg-indigo-50{% endif %}">Tingkatan {{ f }}</a>
+        {% endfor %}
+    </div>
+
+    {% if class_headcounts|length > 0 %}
+    {% for ch in class_headcounts %}
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div class="bg-slate-50 px-5 py-3 border-b flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <span class="text-sm font-bold text-slate-700">{{ ch.class }}</span>
+                <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full">{{ ch.total_students }} pelajar</span>
+                <span class="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-bold rounded-full">{{ ch.subjects|length }} mata pelajaran</span>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-[11px]">
+                <thead>
+                    <tr class="bg-indigo-600 text-white">
+                        <th class="px-2 py-2 text-left">Mata Pelajaran</th>
+                        <th class="px-2 py-2 text-center w-10">Daftar</th>
+                        <th class="px-2 py-2 text-center w-10">Hadir</th>
+                        {% for g in grade_cols %}
+                        <th class="px-1 py-2 text-center w-8">{{ g }}</th>
+                        {% endfor %}
+                        <th class="px-2 py-2 text-center w-8">TH</th>
+                        <th class="px-2 py-2 text-center w-12">Lulus</th>
+                        <th class="px-2 py-2 text-center w-12">%Lulus</th>
+                        <th class="px-2 py-2 text-center w-12">Gagal</th>
+                        <th class="px-2 py-2 text-center w-12">%Gagal</th>
+                        <th class="px-2 py-2 text-center w-12">GPMP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for sh in ch.subjects %}
+                <tr class="border-b hover:bg-slate-50 {% if loop.index % 2 == 0 %}bg-slate-50/50{% endif %}">
+                    <td class="px-2 py-2 font-medium text-slate-800">{{ sh.subject }}</td>
+                    <td class="px-2 py-2 text-center text-slate-500">{{ sh.daftar }}</td>
+                    <td class="px-2 py-2 text-center text-slate-500">{{ sh.hadir }}</td>
+                    {% for g in grade_cols %}
+                    <td class="px-1 py-2 text-center {% if g in ['A+','A','A-','A'] and sh.grades[g] > 0 %}font-bold text-emerald-600{% elif g in ['E','F','G'] and sh.grades[g] > 0 %}text-rose-500{% endif %}">{{ sh.grades[g] if sh.grades[g] > 0 else '-' }}</td>
+                    {% endfor %}
+                    <td class="px-2 py-2 text-center text-slate-400">{{ sh.th if sh.th > 0 else '-' }}</td>
+                    <td class="px-2 py-2 text-center font-bold text-emerald-600">{{ sh.lulus }}</td>
+                    <td class="px-2 py-2 text-center text-emerald-500">{{ "%.1f"|format(sh.lulus_pct) }}%</td>
+                    <td class="px-2 py-2 text-center font-bold text-rose-600">{{ sh.gagal if sh.gagal > 0 else '-' }}</td>
+                    <td class="px-2 py-2 text-center text-rose-500">{{ "%.1f"|format(sh.gagal_pct) if sh.gagal > 0 else '-' }}</td>
+                    <td class="px-2 py-2 text-center font-bold {% if sh.gpmp <= 2.5 %}text-emerald-600{% elif sh.gpmp <= 4.0 %}text-blue-600{% elif sh.gpmp <= 5.5 %}text-amber-600{% else %}text-rose-600{% endif %}">{{ "%.2f"|format(sh.gpmp) }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+        <p class="text-sm text-yellow-700">Tiada data headcount untuk Tingkatan {{ form_filter }}.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

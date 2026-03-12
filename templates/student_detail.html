@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}{{ student.name if student else 'Pelajar' }} - SPM Examination System{% endblock %}
+
+{% block content %}
+{% if student %}
+<div class="space-y-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ student.name }}</h2>
+                <p class="text-gray-600">{{ student.class }} | {{ student.ic }}</p>
+            </div>
+            <div class="flex space-x-2">
+                <a href="/edit-student/{{ student.id }}" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                    Edit
+                </a>
+                <a href="/print/student/{{ student.id }}" target="_blank" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                    Cetak
+                </a>
+                <a href="/students" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    Kembali
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+            <p class="text-blue-100 text-sm font-medium">Jumlah Subjek</p>
+            <p class="text-3xl font-bold mt-2">{{ student.subjects|length }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
+            <p class="text-green-100 text-sm font-medium">Jumlah Mata</p>
+            <p class="text-3xl font-bold mt-2">{{ student.total_marks if student.total_marks else 0 }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+            <p class="text-purple-100 text-sm font-medium">Jumlah Gred</p>
+            <p class="text-3xl font-bold mt-2">{{ student.total_grade if student.total_grade else 0 }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-lg p-6 text-white">
+            <p class="text-orange-100 text-sm font-medium">Purata Gred</p>
+            <p class="text-3xl font-bold mt-2">{{ student.average_grade if student.average_grade else 0 }}</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Keputusan Mata Pelajaran</h3>
+        {% if student.subjects %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bil</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mata Pelajaran</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">TOV</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">U1</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">PPT</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SPMC</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ETR</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for subject in student.subjects %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ loop.index }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ subject.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                {{ subject.tov_grade if subject.tov_grade else '-' }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                {{ subject.u1_grade if subject.u1_grade else '-' }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                                {{ subject.ppt_grade if subject.ppt_grade else '-' }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">
+                                {{ subject.spmc_grade if subject.spmc_grade else '-' }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-pink-100 text-pink-800">
+                                {{ subject.etr_grade if subject.etr_grade else '-' }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-gray-600">Tiada data mata pelajaran.</p>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg">
+    <div class="flex items-center">
+        <svg class="w-6 h-6 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div>
+            <h3 class="text-lg font-semibold text-red-800">Pelajar Tidak Dijumpai</h3>
+            <p class="text-red-700 mt-1">Pelajar yang dicari tidak wujud dalam sistem.</p>
+        </div>
+    </div>
+    <div class="mt-4">
+        <a href="/students" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition inline-block">
+            Kembali ke Senarai Pelajar
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Kad Laporan {{ student.name }} - DAPA 2026{% endblock %}
+{% block content %}
+<div class="space-y-5">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-extrabold text-slate-800">Kad Laporan Pelajar</h2>
+            <p class="text-sm text-slate-500">{{ student.name }} | {{ class_name }}</p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <a href="/report-cards?form={{ class_name.split(' ')[0] }}" class="px-4 py-2 text-sm border rounded-lg hover:bg-slate-50">Kembali</a>
+            <a href="/print/report-card/{{ class_name }}/{{ student_idx }}" target="_blank" class="px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">Cetak PDF</a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border p-5">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase">Nama Pelajar</p>
+                <p class="text-sm font-semibold text-slate-800">{{ student.name }}</p>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase">Kelas</p>
+                <p class="text-sm font-semibold text-slate-800">{{ class_name }}</p>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase">Tingkatan</p>
+                <p class="text-sm font-semibold text-slate-800">{{ student.form }}</p>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase">Tahun</p>
+                <p class="text-sm font-semibold text-slate-800">{{ data.school_info.exam_year or 2026 }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+                <thead>
+                    <tr class="bg-indigo-600 text-white">
+                        <th class="px-3 py-2.5 text-left" rowspan="2">Bil</th>
+                        <th class="px-3 py-2.5 text-left" rowspan="2">Mata Pelajaran</th>
+                        {% for ex in exams %}
+                        <th class="px-2 py-1.5 text-center border-l border-indigo-500" colspan="2">{{ ex }}</th>
+                        {% endfor %}
+                    </tr>
+                    <tr class="bg-indigo-500 text-white text-[10px]">
+                        {% for ex in exams %}
+                        <th class="px-2 py-1 text-center">Markah</th>
+                        <th class="px-2 py-1 text-center">Gred</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                {% for r in results %}
+                <tr class="border-b hover:bg-slate-50">
+                    <td class="px-3 py-2 text-slate-500">{{ loop.index }}</td>
+                    <td class="px-3 py-2 font-medium text-slate-800">{{ r.name }}</td>
+                    {% for ex in exams %}
+                    {% set em = r.exams.get(ex, {}) %}
+                    <td class="px-2 py-2 text-center border-l border-slate-100">{{ em.mark if em.mark != '' else '-' }}</td>
+                    <td class="px-2 py-2 text-center font-bold {% if em.grade in ['A+','A','A-'] %}text-emerald-600{% elif em.grade in ['E','G'] %}text-rose-600{% elif em.grade in ['B+','B'] %}text-blue-600{% elif em.grade in ['C+','C'] %}text-amber-600{% elif em.grade == 'D' %}text-orange-600{% endif %}">{{ em.grade or '-' }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="bg-indigo-50 font-bold border-t-2 border-indigo-200">
+                        <td class="px-3 py-2.5" colspan="2">RUMUSAN</td>
+                        {% for ex in exams %}
+                        {% set t = totals.get(ex, {}) %}
+                        <td class="px-2 py-2.5 text-center border-l border-indigo-200">
+                            {% if t.count > 0 %}{{ "%.1f"|format(t.avg) }}{% else %}-{% endif %}
+                        </td>
+                        <td class="px-2 py-2.5 text-center font-bold {% if t.grade in ['A+','A','A-'] %}text-emerald-600{% elif t.grade in ['E','G'] %}text-rose-600{% endif %}">
+                            {% if t.count > 0 %}{{ t.grade }}{% else %}-{% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr class="bg-slate-50 border-t">
+                        <td class="px-3 py-2" colspan="2">GPA</td>
+                        {% for ex in exams %}
+                        {% set t = totals.get(ex, {}) %}
+                        <td class="px-2 py-2 text-center font-bold text-indigo-600 border-l border-slate-200" colspan="2">
+                            {% if t.count > 0 %}{{ "%.2f"|format(t.gpa) }}{% else %}-{% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr class="bg-slate-50">
+                        <td class="px-3 py-2" colspan="2">Jumlah Markah</td>
+                        {% for ex in exams %}
+                        {% set t = totals.get(ex, {}) %}
+                        <td class="px-2 py-2 text-center font-bold border-l border-slate-200" colspan="2">
+                            {% if t.count > 0 %}{{ "%.1f"|format(t.total_marks) }}{% else %}-{% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr class="bg-slate-50">
+                        <td class="px-3 py-2" colspan="2">Bil. Mata Pelajaran</td>
+                        {% for ex in exams %}
+                        {% set t = totals.get(ex, {}) %}
+                        <td class="px-2 py-2 text-center font-bold border-l border-slate-200" colspan="2">{{ t.count or '-' }}</td>
+                        {% endfor %}
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="flex items-center justify-between">
+        {% if student_idx > 0 %}
+        <a href="/report-card/{{ class_name }}/{{ student_idx - 1 }}" class="px-4 py-2 text-sm border rounded-lg hover:bg-slate-50">Pelajar Sebelum</a>
+        {% else %}<div></div>{% endif %}
+        {% set total_students = data.students_by_class.get(class_name, [])|length %}
+        {% if student_idx < total_students - 1 %}
+        <a href="/report-card/{{ class_name }}/{{ student_idx + 1 }}" class="px-4 py-2 text-sm border rounded-lg hover:bg-slate-50">Pelajar Seterusnya</a>
+        {% else %}<div></div>{% endif %}
+    </div>
+</div>
+{% endblock %}

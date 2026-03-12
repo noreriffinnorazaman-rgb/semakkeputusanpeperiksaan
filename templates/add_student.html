@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Tambah Pelajar - DAPA 2026{% endblock %}
+{% block content %}
+<div class="space-y-5">
+    <div>
+        <h2 class="text-xl font-extrabold text-slate-800">Tambah Pelajar Baru</h2>
+        <p class="text-sm text-slate-500">Masukkan maklumat pelajar</p>
+    </div>
+
+    <form id="studentForm" class="space-y-5">
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+            <h3 class="text-sm font-bold text-slate-700 uppercase mb-4">Maklumat Pelajar</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Pelajar *</label>
+                    <input type="text" id="name" required class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Kelas *</label>
+                    <select id="classSelect" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                        {% for cls in data.students_by_class|sort %}
+                        <option value="{{ cls }}">{{ cls }}</option>
+                        {% endfor %}
+                        <option value="__new__">-- Kelas Baru --</option>
+                    </select>
+                    <input type="text" id="newClass" placeholder="Nama kelas baru" class="hidden mt-2 w-full px-3 py-2 border rounded-lg text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Tingkatan</label>
+                    <select id="form" class="w-full px-3 py-2 border rounded-lg text-sm">
+                        <option value="T5">Tingkatan 5</option>
+                        <option value="T4">Tingkatan 4</option>
+                        <option value="T3">Tingkatan 3</option>
+                        <option value="T2">Tingkatan 2</option>
+                        <option value="T1">Tingkatan 1</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-3">
+            <a href="/students" class="px-5 py-2 border text-slate-600 rounded-lg hover:bg-slate-50 text-sm">Batal</a>
+            <button type="submit" class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-semibold">Simpan Pelajar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.getElementById('classSelect').addEventListener('change', function() {
+    document.getElementById('newClass').classList.toggle('hidden', this.value !== '__new__');
+});
+document.getElementById('studentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    let cls = document.getElementById('classSelect').value;
+    if (cls === '__new__') cls = document.getElementById('newClass').value;
+    if (!cls) { alert('Sila pilih atau masukkan kelas'); return; }
+    const studentData = {
+        name: document.getElementById('name').value,
+        class: cls,
+        form: document.getElementById('form').value
+    };
+    try {
+        const res = await fetch('/add-student', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(studentData) });
+        const result = await res.json();
+        if (result.success) { alert('Pelajar berjaya ditambah!'); window.location.href = '/students?class=' + encodeURIComponent(cls); }
+        else alert('Ralat');
+    } catch (err) { alert('Ralat: ' + err.message); }
+});
+</script>
+{% endblock %}

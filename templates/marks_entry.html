@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}Markah {{ class_name }} ({{ exam_filter }}) - DAPA 2026{% endblock %}
+{% block extra_css %}
+<style>
+    .mark-input { width: 70px; text-align: center; }
+    .mark-input:focus { background: #eef2ff; }
+    .grade-cell { min-width: 40px; text-align: center; font-weight: 700; }
+    .grade-A { color: #059669; } .grade-B { color: #2563eb; } .grade-C { color: #d97706; }
+    .grade-D { color: #ea580c; } .grade-E { color: #dc2626; } .grade-G { color: #dc2626; }
+    .sticky-col { position: sticky; left: 0; background: white; z-index: 10; }
+    .sticky-col-header { position: sticky; left: 0; z-index: 20; }
+    tr:hover .sticky-col { background: #f1f5f9; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="space-y-5">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-extrabold text-slate-800">Kemasukan Markah: {{ class_name }}</h2>
+            <p class="text-sm text-slate-500">{{ students|length }} pelajar | {{ subjects|length }} mata pelajaran</p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <a href="/marks?form={{ class_name.split(' ')[0] }}" class="px-4 py-2 text-sm border rounded-lg hover:bg-slate-50">Kembali</a>
+            <button onclick="saveMarks()" id="saveBtn" class="px-5 py-2 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700">Simpan Markah</button>
+        </div>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+        <span class="px-3 py-2 text-xs font-bold text-slate-400 uppercase">Peperiksaan:</span>
+        {% for exam in exams %}
+        <a href="/marks/entry/{{ class_name }}?exam={{ exam }}" class="px-4 py-2 text-sm font-bold rounded-lg {% if exam_filter == exam %}bg-emerald-600 text-white{% else %}bg-white text-slate-600 border hover:bg-emerald-50{% endif %}">{{ exam_labels.get(exam, exam) }}</a>
+        {% endfor %}
+    </div>
+
+    <div id="saveStatus" class="hidden bg-emerald-50 border border-emerald-300 text-emerald-700 px-4 py-3 rounded-lg text-sm font-semibold"></div>
+
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="text-xs" id="marksTable">
+                <thead>
+                    <tr class="bg-indigo-600 text-white">
+                        <th class="px-3 py-2.5 text-left sticky-col-header bg-indigo-600 min-w-[40px]">Bil</th>
+                        <th class="px-3 py-2.5 text-left sticky-col-header bg-indigo-600 min-w-[200px]" style="left:40px">Nama Pelajar</th>
+                        {% for subj in subjects %}
+                        <th class="px-2 py-2.5 text-center min-w-[80px]">
+                            <div class="text-[10px] leading-tight">{{ subj }}</div>
+                        </th>
+                        {% endfor %}
+                        <th class="px-2 py-2.5 text-center bg-indigo-700 min-w-[70px]">Jumlah</th>
+                        <th class="px-2 py-2.5 text-center bg-indigo-700 min-w-[70px]">Purata</th>
+                        <th class="px-2 py-2.5 text-center bg-indigo-700 min-w-[50px]">Gred</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for student in students %}
+                <tr class="border-b hover:bg-slate-50" data-student="{{ student.name }}">
+                    <td class="px-3 py-2 text-slate-500 sticky-col font-mono">{{ loop.index }}</td>
+                    <td class="px-3 py-2 font-medium text-slate-800 sticky-col" style="left:40px">{{ student.name }}</td>
+                    {% for subj in subjects %}
+                    {% set existing_mark = marks.get(student.name, {}).get(exam_filter, {}).get(subj, '') %}
+                    <td class="px-1 py-1 text-center">
+                        <input type="number" min="0" max="100" step="0.1"
+                               class="mark-input px-1 py-1.5 border rounded text-xs focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400"
+                               data-student="{{ student.name }}" data-subject="{{ subj }}"
+                               value="{{ existing_mark }}"
+                               onchange="updateRow(this)" oninput="updateRow(this)">
+                    </td>
+                    {% endfor %}
+                    <td class="px-2 py-2 text-center font-bold text-slate-700 total-cell">-</td>
+                    <td class="px-2 py-2 text-center font-bold text-slate-700 avg-cell">-</td>
+                    <td class="px-2 py-2 text-center font-bold grade-cell overall-grade-cell">-</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="bg-indigo-50 font-bold border-t-2 border-indigo-200">
+                        <td class="px-3 py-2 sticky-col bg-indigo-50" colspan="2">PURATA KELAS</td>
+                        {% for subj in subjects %}
+                        <td class="px-2 py-2 text-center subj-avg-cell" data-subject="{{ subj }}">-</td>
+                        {% endfor %}
+                        <td class="px-2 py-2 text-center" id="grandTotal">-</td>
+                        <td class="px-2 py-2 text-center" id="grandAvg">-</td>
+                        <td class="px-2 py-2 text-center" id="grandGrade">-</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="bg-slate-50 rounded-xl border p-4">
+        <h3 class="text-xs font-bold text-slate-500 uppercase mb-2">Skala Gred</h3>
+        <div class="flex flex-wrap gap-2 text-xs">
+            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded">A+ (90-100)</span>
+            <span class="px-2 py-1 bg-emerald-50 text-emerald-600 rounded">A (80-89)</span>
+            <span class="px-2 py-1 bg-emerald-50 text-emerald-600 rounded">A- (70-79)</span>
+            <span class="px-2 py-1 bg-blue-50 text-blue-600 rounded">B+ (65-69)</span>
+            <span class="px-2 py-1 bg-blue-50 text-blue-600 rounded">B (60-64)</span>
+            <span class="px-2 py-1 bg-amber-50 text-amber-600 rounded">C+ (55-59)</span>
+            <span class="px-2 py-1 bg-amber-50 text-amber-600 rounded">C (50-54)</span>
+            <span class="px-2 py-1 bg-orange-50 text-orange-600 rounded">D (45-49)</span>
+            <span class="px-2 py-1 bg-red-50 text-red-600 rounded">E (40-44)</span>
+            <span class="px-2 py-1 bg-red-100 text-red-700 rounded">G (0-39)</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const GRADE_TABLE = [
+    [90, 'A+', 1], [80, 'A', 2], [70, 'A-', 3],
+    [65, 'B+', 4], [60, 'B', 5], [55, 'C+', 6],
+    [50, 'C', 7], [45, 'D', 8], [40, 'E', 9], [0, 'G', 0]
+];
+function calcGrade(mark) {
+    if (mark === '' || mark === null || isNaN(mark)) return ['', 0];
+    const m = parseFloat(mark);
+    for (const [threshold, grade, point] of GRADE_TABLE) {
+        if (m >= threshold) return [grade, point];
+    }
+    return ['G', 0];
+}
+function gradeClass(g) {
+    if (['A+','A','A-'].includes(g)) return 'grade-A';
+    if (['B+','B'].includes(g)) return 'grade-B';
+    if (['C+','C'].includes(g)) return 'grade-C';
+    if (g === 'D') return 'grade-D';
+    if (g === 'E') return 'grade-E';
+    if (g === 'G') return 'grade-G';
+    return '';
+}
+function updateRow(input) {
+    const row = input.closest('tr');
+    const inputs = row.querySelectorAll('.mark-input');
+    let total = 0, count = 0;
+    inputs.forEach(inp => {
+        const v = parseFloat(inp.value);
+        if (!isNaN(v)) { total += v; count++; }
+    });
+    const totalCell = row.querySelector('.total-cell');
+    const avgCell = row.querySelector('.avg-cell');
+    const gradeCell = row.querySelector('.overall-grade-cell');
+    if (count > 0) {
+        const avg = total / count;
+        totalCell.textContent = total.toFixed(1);
+        avgCell.textContent = avg.toFixed(1);
+        const [g] = calcGrade(avg);
+        gradeCell.textContent = g;
+        gradeCell.className = 'px-2 py-2 text-center font-bold grade-cell overall-grade-cell ' + gradeClass(g);
+    } else {
+        totalCell.textContent = '-';
+        avgCell.textContent = '-';
+        gradeCell.textContent = '-';
+        gradeCell.className = 'px-2 py-2 text-center font-bold grade-cell overall-grade-cell';
+    }
+    updateClassAvg();
+}
+function updateClassAvg() {
+    const subjects = document.querySelectorAll('.subj-avg-cell');
+    let grandTotal = 0, grandCount = 0;
+    subjects.forEach(cell => {
+        const subj = cell.dataset.subject;
+        const inputs = document.querySelectorAll(`input[data-subject="${subj}"]`);
+        let sum = 0, cnt = 0;
+        inputs.forEach(inp => { const v = parseFloat(inp.value); if (!isNaN(v)) { sum += v; cnt++; } });
+        if (cnt > 0) { cell.textContent = (sum / cnt).toFixed(1); grandTotal += sum; grandCount += cnt; }
+        else cell.textContent = '-';
+    });
+    document.getElementById('grandTotal').textContent = grandCount > 0 ? grandTotal.toFixed(1) : '-';
+    const ga = grandCount > 0 ? grandTotal / grandCount : 0;
+    document.getElementById('grandAvg').textContent = grandCount > 0 ? ga.toFixed(1) : '-';
+    const [gg] = calcGrade(ga);
+    const gc = document.getElementById('grandGrade');
+    gc.textContent = grandCount > 0 ? gg : '-';
+    gc.className = 'px-2 py-2 text-center font-bold ' + gradeClass(gg);
+}
+function saveMarks() {
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true; btn.textContent = 'Menyimpan...';
+    const marks = {};
+    document.querySelectorAll('.mark-input').forEach(inp => {
+        const student = inp.dataset.student;
+        const subject = inp.dataset.subject;
+        const val = inp.value;
+        if (!marks[student]) marks[student] = {};
+        marks[student][subject] = val;
+    });
+    fetch('/marks/save', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ class_name: '{{ class_name }}', exam: '{{ exam_filter }}', marks: marks })
+    }).then(r => r.json()).then(result => {
+        const status = document.getElementById('saveStatus');
+        status.classList.remove('hidden');
+        status.textContent = result.message || 'Berjaya disimpan!';
+        btn.disabled = false; btn.textContent = 'Simpan Markah';
+        setTimeout(() => status.classList.add('hidden'), 3000);
+    }).catch(err => {
+        alert('Ralat: ' + err.message);
+        btn.disabled = false; btn.textContent = 'Simpan Markah';
+    });
+}
+// Initialize on load
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.mark-input').forEach(inp => { if (inp.value) updateRow(inp); });
+});
+</script>
+{% endblock %}
