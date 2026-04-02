@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}Analisis Sejarah SPM - DAPA 2026{% endblock %}
+{% block content %}
+<div class="space-y-5">
+    <div>
+        <h2 class="text-xl font-extrabold text-slate-800">Analisis Sejarah Prestasi SPM</h2>
+        <p class="text-sm text-slate-500">Trend prestasi 5 tahun (2021-2025) untuk semua mata pelajaran SPM</p>
+    </div>
+
+    <!-- Overall School Performance Summary -->
+    {% if data.spm_historical.overall_stats %}
+    <div class="bg-white rounded-xl shadow-sm border p-5">
+        <h3 class="text-sm font-bold text-slate-700 uppercase mb-3">Ringkasan Prestasi Keseluruhan</h3>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            {% for year in [2021, 2022, 2023, 2024, 2025] %}
+                {% set stats = data.spm_historical.overall_stats[year] %}
+                <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-slate-800">{{ year }}</div>
+                    <div class="text-xs text-slate-500 mt-1">Calon: {{ stats.candidates }}</div>
+                    <div class="text-xs text-slate-500">Lulus: {{ stats.passed }}</div>
+                    <div class="text-lg font-bold text-emerald-600 mt-2">{{ "%.1f"|format(stats.pass_rate) }}%</div>
+                    <div class="text-xs text-slate-600">GPMP: {{ "%.2f"|format(stats.gpmp) }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Subject Performance Trends -->
+    {% if data.spm_historical.subjects %}
+    <div class="bg-white rounded-xl shadow-sm border p-5">
+        <h3 class="text-sm font-bold text-slate-700 uppercase mb-3">Trend Prestasi Mata Pelajaran</h3>
+        
+        <!-- Performance Comparison Table -->
+        <div class="overflow-x-auto mb-6">
+            <table class="w-full text-xs">
+                <thead><tr class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                    <th class="px-3 py-3 text-left">Mata Pelajaran</th>
+                    {% for year in [2021, 2022, 2023, 2024, 2025] %}
+                    <th class="px-3 py-3 text-center">{{ year }}<br>GPMP</th>
+                    {% endfor %}
+                    <th class="px-3 py-3 text-center">Purata<br>5 Tahun</th>
+                    <th class="px-3 py-3 text-center">Trend</th>
+                    <th class="px-3 py-3 text-center">Prestasi</th>
+                </tr></thead>
+                <tbody>
+                {% for subject, years_data in data.spm_historical.subjects.items() %}
+                    {% set valid_gpmps = [] %}
+                    {% for y in years_data %}
+                    {% if y.gpmp > 0 %}
+                    {% set _ = valid_gpmps.append(y.gpmp) %}
+                    {% endif %}
+                    {% endfor %}
+                    {% set avg_gpmp = (valid_gpmps|sum / valid_gpmps|length) if valid_gpmps else 0 %}
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="px-3 py-2 font-medium">{{ subject }}</td>
+                        {% for year_data in years_data %}
+                        <td class="px-3 py-2 text-center">
+                            {% if year_data.gpmp > 0 %}
+                                {% set color = 'text-emerald-600' if year_data.gpmp <= 2.0 else ('text-blue-600' if year_data.gpmp <= 3.0 else ('text-amber-600' if year_data.gpmp <= 4.0 else 'text-red-600')) %}
+                                <span class="font-semibold {{ color }}">{{ "%.2f"|format(year_data.gpmp) }}</span>
+                                <div class="text-xs text-slate-500">{{ year_data.candidates }} calon</div>
+                            {% else %}
+                                <span class="text-slate-400">-</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                        <td class="px-3 py-2 text-center font-bold">
+                            {% if avg_gpmp > 0 %}
+                                {% set color = 'text-emerald-600' if avg_gpmp <= 2.0 else ('text-blue-600' if avg_gpmp <= 3.0 else ('text-amber-600' if avg_gpmp <= 4.0 else 'text-red-600')) %}
+                                <span class="{{ color }}">{{ "%.2f"|format(avg_gpmp) }}</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="px-3 py-2 text-center">
+                            {% if valid_gpmps|length > 1 %}
+                                {% set improvement = (valid_gpmps[0] - valid_gpmps[-1]) %}
+                                {% if improvement > 0.1 %}
+                                    <span class="text-emerald-600 font-bold">↑ {{ "%.2f"|format(improvement) }}</span>
+                                {% elif improvement < -0.1 %}
+                                    <span class="text-red-600 font-bold">↓ {{ "%.2f"|format(-improvement) }}</span>
+                                {% else %}
+                                    <span class="text-slate-400">→ Stabil</span>
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="px-3 py-2 text-center">
+                            {% if avg_gpmp > 0 %}
+                                {% if avg_gpmp <= 2.0 %}
+                                    <span class="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-full">Cemerlang</span>
+                                {% elif avg_gpmp <= 3.0 %}
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">Baik</span>
+                                {% elif avg_gpmp <= 4.0 %}
+                                    <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">Sederhana</span>
+                                {% else %}
+                                    <span class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">Perlu Dipertingkatkan</span>
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Performance Categories -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                <h4 class="text-sm font-bold text-emerald-700 mb-2">Prestasi Cemerlang (GPMP ≤ 2.0)</h4>
+                <div class="space-y-1">
+                    {% for subject, years_data in data.spm_historical.subjects.items() %}
+                        {% set valid_gpmps = [y.gpmp for y in years_data if y.gpmp > 0] %}
+                        {% set avg_gpmp = (valid_gpmps|sum / valid_gpmps|length) if valid_gpmps else 0 %}
+                        {% if avg_gpmp > 0 and avg_gpmp <= 2.0 %}
+                            <div class="text-xs text-emerald-600">• {{ subject }} ({{ "%.2f"|format(avg_gpmp) }})</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 class="text-sm font-bold text-blue-700 mb-2">Prestasi Baik (GPMP 2.01 - 3.00)</h4>
+                <div class="space-y-1">
+                    {% for subject, years_data in data.spm_historical.subjects.items() %}
+                        {% set valid_gpmps = [y.gpmp for y in years_data if y.gpmp > 0] %}
+                        {% set avg_gpmp = (valid_gpmps|sum / valid_gpmps|length) if valid_gpmps else 0 %}
+                        {% if avg_gpmp > 2.0 and avg_gpmp <= 3.0 %}
+                            <div class="text-xs text-blue-600">• {{ subject }} ({{ "%.2f"|format(avg_gpmp) }})</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <h4 class="text-sm font-bold text-amber-700 mb-2">Prestasi Sederhana (GPMP 3.01 - 4.00)</h4>
+                <div class="space-y-1">
+                    {% for subject, years_data in data.spm_historical.subjects.items() %}
+                        {% set valid_gpmps = [y.gpmp for y in years_data if y.gpmp > 0] %}
+                        {% set avg_gpmp = (valid_gpmps|sum / valid_gpmps|length) if valid_gpmps else 0 %}
+                        {% if avg_gpmp > 3.0 and avg_gpmp <= 4.0 %}
+                            <div class="text-xs text-amber-600">• {{ subject }} ({{ "%.2f"|format(avg_gpmp) }})</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <h4 class="text-sm font-bold text-red-700 mb-2">Perlu Dipertingkatkan (GPMP > 4.00)</h4>
+                <div class="space-y-1">
+                    {% for subject, years_data in data.spm_historical.subjects.items() %}
+                        {% set valid_gpmps = [y.gpmp for y in years_data if y.gpmp > 0] %}
+                        {% set avg_gpmp = (valid_gpmps|sum / valid_gpmps|length) if valid_gpmps else 0 %}
+                        {% if avg_gpmp > 4.0 %}
+                            <div class="text-xs text-red-600">• {{ subject }} ({{ "%.2f"|format(avg_gpmp) }})</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Year-over-Year Comparison -->
+    {% if data.spm_historical.subjects %}
+    <div class="bg-white rounded-xl shadow-sm border p-5">
+        <h3 class="text-sm font-bold text-slate-700 uppercase mb-3">Perbandingan Tahun ke Tahun</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for year_idx in range(4) %}
+                {% set year1 = 2021 + year_idx %}
+                {% set year2 = 2022 + year_idx %}
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-600 mb-2">{{ year1 }} vs {{ year2 }}</h4>
+                    <div class="space-y-2">
+                        {% for subject, years_data in data.spm_historical.subjects.items() %}
+                            {% set gpmp1 = years_data[year_idx].gpmp %}
+                            {% set gpmp2 = years_data[year_idx + 1].gpmp %}
+                            {% if gpmp1 > 0 and gpmp2 > 0 %}
+                                {% set diff = gpmp2 - gpmp1 %}
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-600">{{ subject }}</span>
+                                    <div class="flex items-center space-x-2">
+                                        <span>{{ "%.2f"|format(gpmp1) }} → {{ "%.2f"|format(gpmp2) }}</span>
+                                        {% if diff < -0.1 %}
+                                            <span class="text-emerald-600 font-bold">↑ {{ "%.2f"|format(-diff) }}</span>
+                                        {% elif diff > 0.1 %}
+                                            <span class="text-red-600 font-bold">↓ {{ "%.2f"|format(diff) }}</span>
+                                        {% else %}
+                                            <span class="text-slate-400">→</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -142,6 +142,96 @@
         {% endfor %}
     </div>
     {% endif %}
+
+    <!-- SPM Historical Performance Analysis -->
+    {% if data.spm_historical %}
+    <div class="bg-white rounded-xl shadow-sm border p-5">
+        <h3 class="text-sm font-bold text-slate-700 uppercase mb-3">Analisis Prestasi SPM 5 Tahun (2021-2025)</h3>
+        
+        <!-- Overall School Performance -->
+        {% if data.spm_historical.overall_stats %}
+        <div class="mb-6">
+            <h4 class="text-xs font-semibold text-slate-600 mb-2">Prestasi Keseluruhan Sekolah</h4>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs">
+                    <thead><tr class="bg-slate-100">
+                        <th class="px-2 py-2 text-left">Tahun</th>
+                        <th class="px-2 py-2 text-center">Calon</th>
+                        <th class="px-2 py-2 text-center">Lulus</th>
+                        <th class="px-2 py-2 text-center">% Lulus</th>
+                        <th class="px-2 py-2 text-center">GPMP</th>
+                    </tr></thead>
+                    <tbody>
+                    {% for year in [2021, 2022, 2023, 2024, 2025] %}
+                        {% if data.spm_historical.overall_stats[year] %}
+                            {% set stats = data.spm_historical.overall_stats[year] %}
+                            <tr class="border-b hover:bg-slate-50">
+                                <td class="px-2 py-1.5 font-medium">{{ year }}</td>
+                                <td class="px-2 py-1.5 text-center">{{ stats.candidates }}</td>
+                                <td class="px-2 py-1.5 text-center">{{ stats.passed }}</td>
+                                <td class="px-2 py-1.5 text-center font-semibold text-emerald-600">{{ "%.1f"|format(stats.pass_rate) }}%</td>
+                                <td class="px-2 py-1.5 text-center font-bold">{{ "%.2f"|format(stats.gpmp) }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Subject-wise Performance -->
+        {% if data.spm_historical.subjects %}
+        <div>
+            <h4 class="text-xs font-semibold text-slate-600 mb-2">Prestasi Mengikut Mata Pelajaran</h4>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs">
+                    <thead><tr class="bg-blue-100">
+                        <th class="px-2 py-2 text-left">Mata Pelajaran</th>
+                        {% for year in [2021, 2022, 2023, 2024, 2025] %}
+                        <th class="px-2 py-2 text-center">{{ year }}<br>GPMP</th>
+                        {% endfor %}
+                        <th class="px-2 py-2 text-center">Trend</th>
+                    </tr></thead>
+                    <tbody>
+                    {% for subject, years_data in data.spm_historical.subjects.items() %}
+                        <tr class="border-b hover:bg-slate-50">
+                            <td class="px-2 py-1.5 font-medium">{{ subject }}</td>
+                            {% for year_data in years_data %}
+                            <td class="px-2 py-1.5 text-center">
+                                {% if year_data.gpmp > 0 %}
+                                    <span class="font-semibold {% if year_data.gpmp <= 2.0 %}text-emerald-600{% elif year_data.gpmp <= 3.0 %}text-blue-600{% elif year_data.gpmp <= 4.0 %}text-amber-600{% else %}text-red-600{% endif %}">
+                                        {{ "%.2f"|format(year_data.gpmp) }}
+                                    </span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                            <td class="px-2 py-1.5 text-center">
+                                {% set first_gpmp = years_data[0].gpmp %}
+                                {% set last_gpmp = years_data[4].gpmp %}
+                                {% if first_gpmp > 0 and last_gpmp > 0 %}
+                                    {% if last_gpmp < first_gpmp %}
+                                        <span class="text-emerald-600 font-bold">↑</span>
+                                    {% elif last_gpmp > first_gpmp %}
+                                        <span class="text-red-600 font-bold">↓</span>
+                                    {% else %}
+                                        <span class="text-slate-400">→</span>
+                                    {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
 {% block extra_js %}

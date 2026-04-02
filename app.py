@@ -268,7 +268,23 @@ def analysis_page():
     data['analysis_kpi'] = filtered_kpi
     data['analysis_hc'] = filtered_hc
     data['hc_by_exam'] = filtered_hc_exam
+    
+    # Add SPM historical data for trend analysis
+    spm_hist = data.get('spm_historical', {})
+    if spm_hist:
+        # Filter SPM subjects to only school subjects
+        spm_subjects = {}
+        for subject, years_data in spm_hist.get('subjects', {}).items():
+            if subject in school_subjects:
+                spm_subjects[subject] = years_data
+        data['spm_historical']['subjects'] = spm_subjects
+    
     return render_template('analysis.html', data=data)
+
+@app.route('/spm-historical')
+def spm_historical_page():
+    data = load_data()
+    return render_template('spm_historical.html', data=data)
 
 @app.route('/individual/<sheet_id>')
 def individual_page(sheet_id):
