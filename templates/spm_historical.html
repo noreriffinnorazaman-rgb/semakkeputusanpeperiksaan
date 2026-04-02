@@ -3,152 +3,269 @@
 {% block content %}
 <div class="space-y-5">
     <div>
-        <h2 class="text-xl font-extrabold text-slate-800">Analisis Sejarah Prestasi SPM</h2>
-        <p class="text-sm text-slate-500">Trend prestasi 5 tahun (2021-2025) untuk semua mata pelajaran SPM</p>
+        <h2 class="text-xl font-extrabold text-slate-800">Analisis Prestasi SPM 5 Tahun (2021-2025)</h2>
+        <p class="text-sm text-slate-500">Analisis mengikut Bidang — SMK Tuanku Lailatul Shahreen</p>
     </div>
 
     <!-- Overall School Performance Summary -->
     {% if data.spm_historical.overall_stats %}
     <div class="bg-white rounded-xl shadow-sm border p-5">
-        <h3 class="text-sm font-bold text-slate-700 uppercase mb-3">Ringkasan Prestasi Keseluruhan</h3>
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <h3 class="text-sm font-bold text-slate-700 uppercase mb-3">Ringkasan Prestasi Keseluruhan Sekolah</h3>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
             {% for year in [2021, 2022, 2023, 2024, 2025] %}
                 {% if data.spm_historical.overall_stats[year] %}
                     {% set stats = data.spm_historical.overall_stats[year] %}
-                    <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg p-4 text-center">
+                    <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg p-4 text-center border">
                         <div class="text-2xl font-bold text-slate-800">{{ year }}</div>
                         <div class="text-xs text-slate-500 mt-1">Calon: {{ stats.candidates }}</div>
                         <div class="text-xs text-slate-500">Lulus: {{ stats.passed }}</div>
                         <div class="text-lg font-bold text-emerald-600 mt-2">{{ "%.1f"|format(stats.pass_rate) }}%</div>
-                        <div class="text-xs text-slate-600">GPMP: {{ "%.2f"|format(stats.gpmp) }}</div>
+                        <div class="text-xs text-slate-600 font-semibold">GPMP: {{ "%.2f"|format(stats.gpmp) }}</div>
                     </div>
                 {% endif %}
             {% endfor %}
         </div>
+        <div style="height:300px"><canvas id="chartOverall"></canvas></div>
     </div>
     {% endif %}
 
-    <!-- Subject Performance Trends -->
-    {% if data.spm_historical.subjects %}
+    <!-- ============================================================ -->
+    <!-- BIDANG 1: BAHASA -->
+    <!-- ============================================================ -->
     <div class="bg-white rounded-xl shadow-sm border p-5">
-        <h3 class="text-sm font-bold text-slate-700 uppercase mb-3">Trend Prestasi Mata Pelajaran</h3>
-        
-        <!-- Performance Comparison Table -->
-        <div class="overflow-x-auto mb-6">
-            <table class="w-full text-xs">
-                <thead><tr class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-                    <th class="px-3 py-3 text-left">Mata Pelajaran</th>
-                    {% for year in [2021, 2022, 2023, 2024, 2025] %}
-                    <th class="px-3 py-3 text-center">{{ year }}<br>GPMP</th>
-                    {% endfor %}
-                    <th class="px-3 py-3 text-center">Trend</th>
-                </tr></thead>
-                <tbody>
-                {% for subject, years_data in data.spm_historical.subjects.items() %}
-                    <tr class="border-b hover:bg-slate-50">
-                        <td class="px-3 py-2 font-medium">{{ subject }}</td>
-                        {% for year_data in years_data %}
-                        <td class="px-3 py-2 text-center">
-                            {% if year_data.gpmp > 0 %}
-                                {% if year_data.gpmp <= 2.0 %}
-                                    {% set color = 'text-emerald-600' %}
-                                {% elif year_data.gpmp <= 3.0 %}
-                                    {% set color = 'text-blue-600' %}
-                                {% elif year_data.gpmp <= 4.0 %}
-                                    {% set color = 'text-amber-600' %}
-                                {% else %}
-                                    {% set color = 'text-red-600' %}
-                                {% endif %}
-                                <span class="font-semibold {{ color }}">{{ "%.2f"|format(year_data.gpmp) }}</span>
-                                <div class="text-xs text-slate-500">{{ year_data.candidates }} calon</div>
-                            {% else %}
-                                <span class="text-slate-400">-</span>
-                            {% endif %}
-                        </td>
-                        {% endfor %}
-                        <td class="px-3 py-2 text-center">
-                            {% set first_gpmp = years_data[0].gpmp %}
-                            {% set last_gpmp = years_data[4].gpmp %}
-                            {% if first_gpmp > 0 and last_gpmp > 0 %}
-                                {% if last_gpmp < first_gpmp %}
-                                    <span class="text-emerald-600 font-bold">↑</span>
-                                {% elif last_gpmp > first_gpmp %}
-                                    <span class="text-red-600 font-bold">↓</span>
-                                {% else %}
-                                    <span class="text-slate-400">→</span>
-                                {% endif %}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Detailed Grade Distribution Per Subject -->
-    {% if data.spm_historical.subjects %}
-    <div class="bg-white rounded-xl shadow-sm border p-5">
-        <h3 class="text-sm font-bold text-slate-700 uppercase mb-3">Taburan Gred Mengikut Mata Pelajaran</h3>
-        {% for subject, years_data in data.spm_historical.subjects.items() %}
-        <div class="mb-6">
-            <h4 class="text-sm font-bold text-blue-700 mb-2 bg-blue-50 px-3 py-2 rounded">{{ subject }}</h4>
-            <div class="overflow-x-auto">
-                <table class="w-full text-xs">
-                    <thead><tr class="bg-slate-100">
-                        <th class="px-2 py-2 text-left">Tahun</th>
-                        <th class="px-2 py-2 text-center">Bil. Ambil</th>
-                        <th class="px-2 py-2 text-center">GPMP</th>
-                        <th class="px-2 py-2 text-center">A+</th>
-                        <th class="px-2 py-2 text-center">A</th>
-                        <th class="px-2 py-2 text-center">A-</th>
-                        <th class="px-2 py-2 text-center">B+</th>
-                        <th class="px-2 py-2 text-center">B</th>
-                        <th class="px-2 py-2 text-center">C+</th>
-                        <th class="px-2 py-2 text-center">C</th>
-                        <th class="px-2 py-2 text-center">D</th>
-                        <th class="px-2 py-2 text-center">E</th>
-                        <th class="px-2 py-2 text-center">G</th>
-                        <th class="px-2 py-2 text-center">Lulus</th>
-                        <th class="px-2 py-2 text-center">% Lulus</th>
-                    </tr></thead>
-                    <tbody>
-                    {% for i in range(5) %}
-                        {% set year = [2021,2022,2023,2024,2025][i] %}
-                        {% set yd = years_data[i] %}
-                        {% if yd.candidates > 0 %}
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="px-2 py-1.5 font-medium">{{ year }}</td>
-                            <td class="px-2 py-1.5 text-center">{{ yd.candidates }}</td>
-                            <td class="px-2 py-1.5 text-center font-bold {% if yd.gpmp <= 2.0 %}text-emerald-600{% elif yd.gpmp <= 3.0 %}text-blue-600{% elif yd.gpmp <= 4.0 %}text-amber-600{% else %}text-red-600{% endif %}">{{ "%.2f"|format(yd.gpmp) }}</td>
-                            <td class="px-2 py-1.5 text-center {% if yd.grades['A+'] > 0 %}font-bold text-emerald-700{% endif %}">{{ yd.grades['A+'] }}</td>
-                            <td class="px-2 py-1.5 text-center {% if yd.grades['A'] > 0 %}font-bold text-emerald-600{% endif %}">{{ yd.grades['A'] }}</td>
-                            <td class="px-2 py-1.5 text-center {% if yd.grades['A-'] > 0 %}font-semibold text-green-600{% endif %}">{{ yd.grades['A-'] }}</td>
-                            <td class="px-2 py-1.5 text-center {% if yd.grades['B+'] > 0 %}text-blue-600{% endif %}">{{ yd.grades['B+'] }}</td>
-                            <td class="px-2 py-1.5 text-center {% if yd.grades['B'] > 0 %}text-blue-500{% endif %}">{{ yd.grades['B'] }}</td>
-                            <td class="px-2 py-1.5 text-center {% if yd.grades['C+'] > 0 %}text-amber-600{% endif %}">{{ yd.grades['C+'] }}</td>
-                            <td class="px-2 py-1.5 text-center {% if yd.grades['C'] > 0 %}text-amber-500{% endif %}">{{ yd.grades['C'] }}</td>
-                            <td class="px-2 py-1.5 text-center {% if yd.grades['D'] > 0 %}text-orange-600{% endif %}">{{ yd.grades['D'] }}</td>
-                            <td class="px-2 py-1.5 text-center {% if yd.grades['E'] > 0 %}text-red-500{% endif %}">{{ yd.grades['E'] }}</td>
-                            <td class="px-2 py-1.5 text-center {% if yd.grades['G'] > 0 %}font-bold text-red-700{% endif %}">{{ yd.grades['G'] }}</td>
-                            <td class="px-2 py-1.5 text-center font-semibold">{{ yd.passed }}</td>
-                            <td class="px-2 py-1.5 text-center font-semibold {% if yd.pass_rate >= 95 %}text-emerald-600{% elif yd.pass_rate >= 80 %}text-blue-600{% elif yd.pass_rate >= 60 %}text-amber-600{% else %}text-red-600{% endif %}">{{ "%.1f"|format(yd.pass_rate) }}%</td>
-                        </tr>
-                        {% endif %}
-                    {% endfor %}
-                    </tbody>
-                </table>
+        <div class="flex items-center space-x-3 mb-4">
+            <div class="w-2 h-8 bg-blue-600 rounded-full"></div>
+            <div>
+                <h3 class="text-lg font-extrabold text-blue-800 uppercase">Bidang Bahasa</h3>
+                <p class="text-xs text-slate-500">Bahasa Melayu, Bahasa Inggeris, Bahasa Arab</p>
             </div>
         </div>
+        <div style="height:350px" class="mb-6"><canvas id="chartBidangBahasa"></canvas></div>
+        {% set bahasa_subjects = ['Bahasa Melayu', 'Bahasa Inggeris', 'Bahasa Arab'] %}
+        {% for subj_name in bahasa_subjects %}
+            {% if subj_name in data.spm_historical.subjects %}
+            {% set years_data = data.spm_historical.subjects[subj_name] %}
+            <div class="mb-5">
+                <h4 class="text-sm font-bold text-blue-700 mb-2 bg-blue-50 px-3 py-2 rounded flex items-center justify-between">
+                    <span>{{ subj_name }}</span>
+                    <span class="text-xs font-normal text-slate-500">GPMP 2025: <span class="font-bold {% if years_data[4].gpmp <= 2.0 %}text-emerald-600{% elif years_data[4].gpmp <= 3.0 %}text-blue-600{% elif years_data[4].gpmp <= 4.0 %}text-amber-600{% else %}text-red-600{% endif %}">{{ "%.2f"|format(years_data[4].gpmp) }}</span></span>
+                </h4>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div style="height:220px"><canvas id="chart_{{ subj_name|replace(' ','_') }}_gpmp"></canvas></div>
+                    <div style="height:220px"><canvas id="chart_{{ subj_name|replace(' ','_') }}_grades"></canvas></div>
+                </div>
+                <div class="overflow-x-auto mt-2">
+                    <table class="w-full text-xs">
+                        <thead><tr class="bg-slate-100">
+                            <th class="px-2 py-1.5 text-left">Tahun</th><th class="px-2 py-1.5 text-center">Bil.</th><th class="px-2 py-1.5 text-center">GPMP</th>
+                            <th class="px-2 py-1.5 text-center">A+</th><th class="px-2 py-1.5 text-center">A</th><th class="px-2 py-1.5 text-center">A-</th>
+                            <th class="px-2 py-1.5 text-center">B+</th><th class="px-2 py-1.5 text-center">B</th><th class="px-2 py-1.5 text-center">C+</th>
+                            <th class="px-2 py-1.5 text-center">C</th><th class="px-2 py-1.5 text-center">D</th><th class="px-2 py-1.5 text-center">E</th>
+                            <th class="px-2 py-1.5 text-center">G</th><th class="px-2 py-1.5 text-center">Lulus</th><th class="px-2 py-1.5 text-center">%Lulus</th>
+                        </tr></thead>
+                        <tbody>
+                        {% for i in range(5) %}
+                            {% set yr = [2021,2022,2023,2024,2025][i] %}{% set yd = years_data[i] %}
+                            {% if yd.candidates > 0 %}
+                            <tr class="border-b hover:bg-slate-50{% if i == 4 %} bg-blue-50 font-semibold{% endif %}">
+                                <td class="px-2 py-1 font-medium">{{ yr }}</td><td class="px-2 py-1 text-center">{{ yd.candidates }}</td>
+                                <td class="px-2 py-1 text-center font-bold {% if yd.gpmp <= 2.0 %}text-emerald-600{% elif yd.gpmp <= 3.0 %}text-blue-600{% elif yd.gpmp <= 4.0 %}text-amber-600{% else %}text-red-600{% endif %}">{{ "%.2f"|format(yd.gpmp) }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['A+'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['A'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['A-'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['B+'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['B'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['C+'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['C'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['D'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['E'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['G'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.passed }}</td>
+                                <td class="px-2 py-1 text-center {% if yd.pass_rate >= 95 %}text-emerald-600{% elif yd.pass_rate >= 80 %}text-blue-600{% else %}text-red-600{% endif %}">{{ "%.1f"|format(yd.pass_rate) }}%</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
         {% endfor %}
     </div>
-    {% endif %}
+
+    <!-- ============================================================ -->
+    <!-- BIDANG 2: KEMANUSIAAN -->
+    <!-- ============================================================ -->
+    <div class="bg-white rounded-xl shadow-sm border p-5">
+        <div class="flex items-center space-x-3 mb-4">
+            <div class="w-2 h-8 bg-emerald-600 rounded-full"></div>
+            <div>
+                <h3 class="text-lg font-extrabold text-emerald-800 uppercase">Bidang Kemanusiaan</h3>
+                <p class="text-xs text-slate-500">Sejarah, Geografi, Pendidikan Islam, Pendidikan Seni Visual, Pend. Al-Quran Dan Al-Sunnah, Pend. Syariah Islamiah</p>
+            </div>
+        </div>
+        <div style="height:350px" class="mb-6"><canvas id="chartBidangKemanusiaan"></canvas></div>
+        {% set kemanusiaan_subjects = ['Sejarah', 'Geografi', 'Pendidikan Islam', 'Pendidikan Seni Visual', 'Pendidikan Al-Quran Dan Al-Sunnah', 'Pendidikan Syariah Islamiah'] %}
+        {% for subj_name in kemanusiaan_subjects %}
+            {% if subj_name in data.spm_historical.subjects %}
+            {% set years_data = data.spm_historical.subjects[subj_name] %}
+            <div class="mb-5">
+                <h4 class="text-sm font-bold text-emerald-700 mb-2 bg-emerald-50 px-3 py-2 rounded flex items-center justify-between">
+                    <span>{{ subj_name }}</span>
+                    <span class="text-xs font-normal text-slate-500">GPMP 2025: <span class="font-bold {% if years_data[4].gpmp <= 2.0 %}text-emerald-600{% elif years_data[4].gpmp <= 3.0 %}text-blue-600{% elif years_data[4].gpmp <= 4.0 %}text-amber-600{% else %}text-red-600{% endif %}">{{ "%.2f"|format(years_data[4].gpmp) }}</span></span>
+                </h4>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div style="height:220px"><canvas id="chart_{{ subj_name|replace(' ','_')|replace('-','_') }}_gpmp"></canvas></div>
+                    <div style="height:220px"><canvas id="chart_{{ subj_name|replace(' ','_')|replace('-','_') }}_grades"></canvas></div>
+                </div>
+                <div class="overflow-x-auto mt-2">
+                    <table class="w-full text-xs">
+                        <thead><tr class="bg-slate-100">
+                            <th class="px-2 py-1.5 text-left">Tahun</th><th class="px-2 py-1.5 text-center">Bil.</th><th class="px-2 py-1.5 text-center">GPMP</th>
+                            <th class="px-2 py-1.5 text-center">A+</th><th class="px-2 py-1.5 text-center">A</th><th class="px-2 py-1.5 text-center">A-</th>
+                            <th class="px-2 py-1.5 text-center">B+</th><th class="px-2 py-1.5 text-center">B</th><th class="px-2 py-1.5 text-center">C+</th>
+                            <th class="px-2 py-1.5 text-center">C</th><th class="px-2 py-1.5 text-center">D</th><th class="px-2 py-1.5 text-center">E</th>
+                            <th class="px-2 py-1.5 text-center">G</th><th class="px-2 py-1.5 text-center">Lulus</th><th class="px-2 py-1.5 text-center">%Lulus</th>
+                        </tr></thead>
+                        <tbody>
+                        {% for i in range(5) %}
+                            {% set yr = [2021,2022,2023,2024,2025][i] %}{% set yd = years_data[i] %}
+                            {% if yd.candidates > 0 %}
+                            <tr class="border-b hover:bg-slate-50{% if i == 4 %} bg-emerald-50 font-semibold{% endif %}">
+                                <td class="px-2 py-1 font-medium">{{ yr }}</td><td class="px-2 py-1 text-center">{{ yd.candidates }}</td>
+                                <td class="px-2 py-1 text-center font-bold {% if yd.gpmp <= 2.0 %}text-emerald-600{% elif yd.gpmp <= 3.0 %}text-blue-600{% elif yd.gpmp <= 4.0 %}text-amber-600{% else %}text-red-600{% endif %}">{{ "%.2f"|format(yd.gpmp) }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['A+'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['A'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['A-'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['B+'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['B'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['C+'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['C'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['D'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['E'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['G'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.passed }}</td>
+                                <td class="px-2 py-1 text-center {% if yd.pass_rate >= 95 %}text-emerald-600{% elif yd.pass_rate >= 80 %}text-blue-600{% else %}text-red-600{% endif %}">{{ "%.1f"|format(yd.pass_rate) }}%</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- BIDANG 3: SAINS & MATEMATIK -->
+    <!-- ============================================================ -->
+    <div class="bg-white rounded-xl shadow-sm border p-5">
+        <div class="flex items-center space-x-3 mb-4">
+            <div class="w-2 h-8 bg-purple-600 rounded-full"></div>
+            <div>
+                <h3 class="text-lg font-extrabold text-purple-800 uppercase">Bidang Sains & Matematik</h3>
+                <p class="text-xs text-slate-500">Matematik, Matematik Tambahan, Sains, Fizik, Kimia, Biologi</p>
+            </div>
+        </div>
+        <div style="height:350px" class="mb-6"><canvas id="chartBidangSains"></canvas></div>
+        {% set sains_subjects = ['Matematik', 'Matematik Tambahan', 'Sains', 'Fizik', 'Kimia', 'Biologi'] %}
+        {% for subj_name in sains_subjects %}
+            {% if subj_name in data.spm_historical.subjects %}
+            {% set years_data = data.spm_historical.subjects[subj_name] %}
+            <div class="mb-5">
+                <h4 class="text-sm font-bold text-purple-700 mb-2 bg-purple-50 px-3 py-2 rounded flex items-center justify-between">
+                    <span>{{ subj_name }}</span>
+                    <span class="text-xs font-normal text-slate-500">GPMP 2025: <span class="font-bold {% if years_data[4].gpmp <= 2.0 %}text-emerald-600{% elif years_data[4].gpmp <= 3.0 %}text-blue-600{% elif years_data[4].gpmp <= 4.0 %}text-amber-600{% else %}text-red-600{% endif %}">{{ "%.2f"|format(years_data[4].gpmp) }}</span></span>
+                </h4>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div style="height:220px"><canvas id="chart_{{ subj_name|replace(' ','_') }}_gpmp"></canvas></div>
+                    <div style="height:220px"><canvas id="chart_{{ subj_name|replace(' ','_') }}_grades"></canvas></div>
+                </div>
+                <div class="overflow-x-auto mt-2">
+                    <table class="w-full text-xs">
+                        <thead><tr class="bg-slate-100">
+                            <th class="px-2 py-1.5 text-left">Tahun</th><th class="px-2 py-1.5 text-center">Bil.</th><th class="px-2 py-1.5 text-center">GPMP</th>
+                            <th class="px-2 py-1.5 text-center">A+</th><th class="px-2 py-1.5 text-center">A</th><th class="px-2 py-1.5 text-center">A-</th>
+                            <th class="px-2 py-1.5 text-center">B+</th><th class="px-2 py-1.5 text-center">B</th><th class="px-2 py-1.5 text-center">C+</th>
+                            <th class="px-2 py-1.5 text-center">C</th><th class="px-2 py-1.5 text-center">D</th><th class="px-2 py-1.5 text-center">E</th>
+                            <th class="px-2 py-1.5 text-center">G</th><th class="px-2 py-1.5 text-center">Lulus</th><th class="px-2 py-1.5 text-center">%Lulus</th>
+                        </tr></thead>
+                        <tbody>
+                        {% for i in range(5) %}
+                            {% set yr = [2021,2022,2023,2024,2025][i] %}{% set yd = years_data[i] %}
+                            {% if yd.candidates > 0 %}
+                            <tr class="border-b hover:bg-slate-50{% if i == 4 %} bg-purple-50 font-semibold{% endif %}">
+                                <td class="px-2 py-1 font-medium">{{ yr }}</td><td class="px-2 py-1 text-center">{{ yd.candidates }}</td>
+                                <td class="px-2 py-1 text-center font-bold {% if yd.gpmp <= 2.0 %}text-emerald-600{% elif yd.gpmp <= 3.0 %}text-blue-600{% elif yd.gpmp <= 4.0 %}text-amber-600{% else %}text-red-600{% endif %}">{{ "%.2f"|format(yd.gpmp) }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['A+'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['A'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['A-'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['B+'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['B'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['C+'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['C'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['D'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['E'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['G'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.passed }}</td>
+                                <td class="px-2 py-1 text-center {% if yd.pass_rate >= 95 %}text-emerald-600{% elif yd.pass_rate >= 80 %}text-blue-600{% else %}text-red-600{% endif %}">{{ "%.1f"|format(yd.pass_rate) }}%</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- BIDANG 4: TEKNIK & VOKASIONAL -->
+    <!-- ============================================================ -->
+    <div class="bg-white rounded-xl shadow-sm border p-5">
+        <div class="flex items-center space-x-3 mb-4">
+            <div class="w-2 h-8 bg-amber-600 rounded-full"></div>
+            <div>
+                <h3 class="text-lg font-extrabold text-amber-800 uppercase">Bidang Teknik & Vokasional</h3>
+                <p class="text-xs text-slate-500">Prinsip Perakaunan, Perniagaan, Sains Komputer</p>
+            </div>
+        </div>
+        <div style="height:350px" class="mb-6"><canvas id="chartBidangTeknik"></canvas></div>
+        {% set teknik_subjects = ['Prinsip Perakaunan', 'Perniagaan', 'Sains Komputer'] %}
+        {% for subj_name in teknik_subjects %}
+            {% if subj_name in data.spm_historical.subjects %}
+            {% set years_data = data.spm_historical.subjects[subj_name] %}
+            <div class="mb-5">
+                <h4 class="text-sm font-bold text-amber-700 mb-2 bg-amber-50 px-3 py-2 rounded flex items-center justify-between">
+                    <span>{{ subj_name }}</span>
+                    <span class="text-xs font-normal text-slate-500">GPMP 2025: <span class="font-bold {% if years_data[4].gpmp <= 2.0 %}text-emerald-600{% elif years_data[4].gpmp <= 3.0 %}text-blue-600{% elif years_data[4].gpmp <= 4.0 %}text-amber-600{% else %}text-red-600{% endif %}">{{ "%.2f"|format(years_data[4].gpmp) }}</span></span>
+                </h4>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div style="height:220px"><canvas id="chart_{{ subj_name|replace(' ','_') }}_gpmp"></canvas></div>
+                    <div style="height:220px"><canvas id="chart_{{ subj_name|replace(' ','_') }}_grades"></canvas></div>
+                </div>
+                <div class="overflow-x-auto mt-2">
+                    <table class="w-full text-xs">
+                        <thead><tr class="bg-slate-100">
+                            <th class="px-2 py-1.5 text-left">Tahun</th><th class="px-2 py-1.5 text-center">Bil.</th><th class="px-2 py-1.5 text-center">GPMP</th>
+                            <th class="px-2 py-1.5 text-center">A+</th><th class="px-2 py-1.5 text-center">A</th><th class="px-2 py-1.5 text-center">A-</th>
+                            <th class="px-2 py-1.5 text-center">B+</th><th class="px-2 py-1.5 text-center">B</th><th class="px-2 py-1.5 text-center">C+</th>
+                            <th class="px-2 py-1.5 text-center">C</th><th class="px-2 py-1.5 text-center">D</th><th class="px-2 py-1.5 text-center">E</th>
+                            <th class="px-2 py-1.5 text-center">G</th><th class="px-2 py-1.5 text-center">Lulus</th><th class="px-2 py-1.5 text-center">%Lulus</th>
+                        </tr></thead>
+                        <tbody>
+                        {% for i in range(5) %}
+                            {% set yr = [2021,2022,2023,2024,2025][i] %}{% set yd = years_data[i] %}
+                            {% if yd.candidates > 0 %}
+                            <tr class="border-b hover:bg-slate-50{% if i == 4 %} bg-amber-50 font-semibold{% endif %}">
+                                <td class="px-2 py-1 font-medium">{{ yr }}</td><td class="px-2 py-1 text-center">{{ yd.candidates }}</td>
+                                <td class="px-2 py-1 text-center font-bold {% if yd.gpmp <= 2.0 %}text-emerald-600{% elif yd.gpmp <= 3.0 %}text-blue-600{% elif yd.gpmp <= 4.0 %}text-amber-600{% else %}text-red-600{% endif %}">{{ "%.2f"|format(yd.gpmp) }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['A+'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['A'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['A-'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['B+'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['B'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['C+'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['C'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['D'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.grades['E'] }}</td><td class="px-2 py-1 text-center">{{ yd.grades['G'] }}</td>
+                                <td class="px-2 py-1 text-center">{{ yd.passed }}</td>
+                                <td class="px-2 py-1 text-center {% if yd.pass_rate >= 95 %}text-emerald-600{% elif yd.pass_rate >= 80 %}text-blue-600{% else %}text-red-600{% endif %}">{{ "%.1f"|format(yd.pass_rate) }}%</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
 
     <!-- Performance Summary -->
-    {% if data.spm_historical.subjects %}
     <div class="bg-white rounded-xl shadow-sm border p-5">
         <h3 class="text-sm font-bold text-slate-700 uppercase mb-3">Ringkasan Prestasi SPM 2025</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -171,7 +288,7 @@
                 <div class="space-y-2">
                     {% for subject, years_data in data.spm_historical.subjects.items() %}
                         {% set last_gpmp = years_data[4].gpmp %}
-                        {% if last_gpmp > 0 and last_gpmp >= 3.5 %}
+                        {% if last_gpmp > 0 and last_gpmp >= 4.0 %}
                             <div class="flex items-center justify-between text-xs">
                                 <span class="text-slate-600">{{ subject }}</span>
                                 <span class="font-semibold text-red-600">{{ "%.2f"|format(last_gpmp) }}</span>
@@ -182,6 +299,155 @@
             </div>
         </div>
     </div>
-    {% endif %}
 </div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const YEARS = ['2021','2022','2023','2024','2025'];
+const YEAR_COLORS = ['#64748b','#6366f1','#8b5cf6','#0ea5e9','#059669'];
+const GRADE_LABELS = ['A+','A','A-','B+','B','C+','C','D','E','G'];
+const GRADE_COLORS = ['#059669','#10b981','#34d399','#3b82f6','#60a5fa','#f59e0b','#fbbf24','#f97316','#ef4444','#991b1b'];
+
+const spmData = {{ data.spm_historical.subjects | tojson }};
+const overallStats = {{ data.spm_historical.overall_stats | tojson }};
+
+function makeGpmpBarChart(canvasId, title, gpmpValues) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: YEARS,
+            datasets: [{
+                label: 'GPMP',
+                data: gpmpValues,
+                backgroundColor: gpmpValues.map(v => v === 0 ? '#e2e8f0' : v <= 2 ? '#059669' : v <= 3 ? '#3b82f6' : v <= 4 ? '#f59e0b' : '#ef4444'),
+                borderRadius: 6, borderSkipped: false, barPercentage: 0.6
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                title: { display: true, text: title + ' — GPMP 5 Tahun', font: { size: 12, weight: 'bold' } },
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => 'GPMP: ' + ctx.raw.toFixed(2) } }
+            },
+            scales: {
+                y: { beginAtZero: true, max: 10, title: { display: true, text: 'GPMP', font: { size: 10 } }, grid: { color: '#f1f5f9' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+function makeGradeStackedChart(canvasId, title, subjectData) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    const datasets = GRADE_LABELS.map((g, gi) => ({
+        label: g,
+        data: subjectData.map(yd => yd.candidates > 0 ? yd.grades[g] : 0),
+        backgroundColor: GRADE_COLORS[gi],
+        borderRadius: 2
+    }));
+    const activeYears = [];
+    for (let i = 0; i < 5; i++) {
+        if (subjectData[i].candidates > 0) activeYears.push(YEARS[i]);
+        else activeYears.push(YEARS[i]);
+    }
+    new Chart(ctx, {
+        type: 'bar',
+        data: { labels: activeYears, datasets: datasets },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                title: { display: true, text: title + ' — Taburan Gred', font: { size: 12, weight: 'bold' } },
+                legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 9 }, padding: 6 } }
+            },
+            scales: {
+                x: { stacked: true, grid: { display: false } },
+                y: { stacked: true, title: { display: true, text: 'Bilangan', font: { size: 10 } }, grid: { color: '#f1f5f9' } }
+            }
+        }
+    });
+}
+
+function makeBidangChart(canvasId, title, subjectNames, color) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    const datasets = subjectNames.filter(s => spmData[s]).map((s, si) => {
+        const hues = [color, adjustColor(color, 40), adjustColor(color, 80), adjustColor(color, -40), adjustColor(color, -80), adjustColor(color, 120)];
+        return {
+            label: s,
+            data: spmData[s].map(yd => yd.gpmp > 0 ? yd.gpmp : null),
+            backgroundColor: hues[si % hues.length],
+            borderRadius: 4, barPercentage: 0.8, categoryPercentage: 0.85
+        };
+    });
+    new Chart(ctx, {
+        type: 'bar',
+        data: { labels: YEARS, datasets: datasets },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                title: { display: true, text: title + ' — Perbandingan GPMP 5 Tahun', font: { size: 14, weight: 'bold' } },
+                legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 }, padding: 8 } },
+                tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + (ctx.raw ? ctx.raw.toFixed(2) : '-') } }
+            },
+            scales: {
+                y: { beginAtZero: true, max: 10, title: { display: true, text: 'GPMP (rendah = lebih baik)', font: { size: 11 } }, grid: { color: '#f1f5f9' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+function adjustColor(hex, amount) {
+    let r = parseInt(hex.slice(1,3), 16), g = parseInt(hex.slice(3,5), 16), b = parseInt(hex.slice(5,7), 16);
+    r = Math.min(255, Math.max(0, r + amount));
+    g = Math.min(255, Math.max(0, g + amount));
+    b = Math.min(255, Math.max(0, b + amount));
+    return '#' + [r,g,b].map(c => c.toString(16).padStart(2,'0')).join('');
+}
+
+// Overall chart
+new Chart(document.getElementById('chartOverall'), {
+    type: 'bar',
+    data: {
+        labels: YEARS,
+        datasets: [{
+            label: 'GPMP Keseluruhan',
+            data: YEARS.map(y => overallStats[y] ? overallStats[y].gpmp : 0),
+            backgroundColor: ['#64748b','#6366f1','#8b5cf6','#0ea5e9','#059669'],
+            borderRadius: 8, barPercentage: 0.5
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+            title: { display: true, text: 'GPMP Keseluruhan Sekolah 5 Tahun', font: { size: 14, weight: 'bold' } },
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => 'GPMP: ' + ctx.raw.toFixed(2) } }
+        },
+        scales: {
+            y: { beginAtZero: true, max: 6, title: { display: true, text: 'GPMP', font: { size: 11 } }, grid: { color: '#f1f5f9' } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// Bidang Charts
+makeBidangChart('chartBidangBahasa', 'BIDANG BAHASA', ['Bahasa Melayu','Bahasa Inggeris','Bahasa Arab'], '#3b82f6');
+makeBidangChart('chartBidangKemanusiaan', 'BIDANG KEMANUSIAAN', ['Sejarah','Geografi','Pendidikan Islam','Pendidikan Seni Visual','Pendidikan Al-Quran Dan Al-Sunnah','Pendidikan Syariah Islamiah'], '#059669');
+makeBidangChart('chartBidangSains', 'BIDANG SAINS & MATEMATIK', ['Matematik','Matematik Tambahan','Sains','Fizik','Kimia','Biologi'], '#7c3aed');
+makeBidangChart('chartBidangTeknik', 'BIDANG TEKNIK & VOKASIONAL', ['Prinsip Perakaunan','Perniagaan','Sains Komputer'], '#d97706');
+
+// Individual subject charts
+for (const [name, yearData] of Object.entries(spmData)) {
+    const safeId = name.replace(/ /g, '_').replace(/-/g, '_');
+    const gpmpVals = yearData.map(yd => yd.gpmp);
+    makeGpmpBarChart('chart_' + safeId + '_gpmp', name, gpmpVals);
+    makeGradeStackedChart('chart_' + safeId + '_grades', name, yearData);
+}
+</script>
 {% endblock %}
