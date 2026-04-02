@@ -1,0 +1,965 @@
+{
+  "spm_historical": {
+    "years": [
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "subjects": {
+      "Bahasa Melayu": [
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        }
+      ],
+      "Bahasa Inggeris": [
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        }
+      ],
+      "Matematik": [
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        }
+      ],
+      "Sains": [
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        }
+      ],
+      "Sejarah": [
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        }
+      ],
+      "Geografi": [
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        }
+      ],
+      "Fizik": [
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        }
+      ],
+      "Kimia": [
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        }
+      ],
+      "Biologi": [
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        }
+      ],
+      "Pendidikan Moral": [
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        },
+        {
+          "gpmp": 0.0,
+          "grades": {
+            "A+": 0,
+            "A": 0,
+            "A-": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "E": 0,
+            "G": 0
+          },
+          "candidates": 0,
+          "passed": 0,
+          "pass_rate": 0
+        }
+      ]
+    },
+    "overall_stats": {
+      "2021": {
+        "gpmp": 0.0,
+        "candidates": 0,
+        "passed": 0,
+        "pass_rate": 0.0
+      },
+      "2022": {
+        "gpmp": 0.0,
+        "candidates": 0,
+        "passed": 0,
+        "pass_rate": 0.0
+      },
+      "2023": {
+        "gpmp": 0.0,
+        "candidates": 0,
+        "passed": 0,
+        "pass_rate": 0.0
+      },
+      "2024": {
+        "gpmp": 0.0,
+        "candidates": 0,
+        "passed": 0,
+        "pass_rate": 0.0
+      },
+      "2025": {
+        "gpmp": 0.0,
+        "candidates": 0,
+        "passed": 0,
+        "pass_rate": 0.0
+      }
+    }
+  }
+}
