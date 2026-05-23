@@ -83,6 +83,21 @@ def subject_detail(category, idx):
     subject = subjects[idx] if idx < len(subjects) else None
     return render_template('subject_detail.html', subject=subject, category=category, data=data)
 
+def calc_grade_lower(mark):
+    """Grade calculation for lower forms (Form 1-3): A>=80, B>=70, C>=60, D>=50, E>=40, F<40"""
+    if mark is None or mark == '':
+        return '', 0
+    try:
+        m = float(mark)
+    except (ValueError, TypeError):
+        return '', 0
+    if m >= 80: return 'A', 1
+    if m >= 70: return 'B', 2
+    if m >= 60: return 'C', 3
+    if m >= 50: return 'D', 4
+    if m >= 40: return 'E', 5
+    return 'F', 6
+
 def _get_student_marks_for_exam(data, cls, exam_filter):
     """Get student marks for a given class and exam.
     For UAT: use uat_data directly.
@@ -128,7 +143,11 @@ def _get_student_marks_for_exam(data, cls, exam_filter):
                 elif m != '' and m is not None:
                     try:
                         mark_val = float(m)
-                        g, _ = calc_grade(mark_val)
+                        fn = get_form_number(cls)
+                        if fn >= 4:
+                            g, _ = calc_grade(mark_val)
+                        else:
+                            g, _ = calc_grade_lower(mark_val)
                         student_marks[subj] = {'mark': mark_val, 'grade': g}
                     except (ValueError, TypeError):
                         student_marks[subj] = {'mark': '', 'grade': ''}
@@ -1059,11 +1078,14 @@ def rumusan_page():
     subjects_short = list(subj_map.keys()) if subj_map else []
     subjects_full = list(subj_map.values()) if subj_map else []
 
-    # Gather all students for this form
+    # Gather all students for this form using exam-specific data
     form_classes = sorted([c for c in uat.keys() if get_form_number(c) == fn])
+    exam_data_by_class = {}
     all_students = []
     for cls in form_classes:
-        all_students.extend(uat.get(cls, []))
+        cls_students = _get_students_for_exam(data, cls, exam_filter)
+        exam_data_by_class[cls] = cls_students
+        all_students.extend(cls_students)
 
     # --- Ranking tab ---
     ranking = sorted(
@@ -1074,7 +1096,7 @@ def rumusan_page():
     # --- Analisis Pencapaian Mengikut Kelas tab ---
     analisis_kelas = []
     for cls in form_classes:
-        cls_students = uat.get(cls, [])
+        cls_students = exam_data_by_class.get(cls, [])
         grade_counts = {g: 0 for g in grade_cols}
         th_count = 0
         total_gp = 0
@@ -1108,7 +1130,7 @@ def rumusan_page():
     a_grades_lower = {'A'}
     a_grades_upper = {'A+', 'A', 'A-'}
     for cls in form_classes:
-        cls_students = uat.get(cls, [])
+        cls_students = exam_data_by_class.get(cls, [])
         total = len(cls_students)
         hadir = 0; semua_a = 0; lulus = 0; gagal = 0
         total_gp = 0; gp_count = 0
@@ -1170,7 +1192,7 @@ def print_rumusan(form_num):
     form_classes = sorted([c for c in uat.keys() if get_form_number(c) == fn])
     all_students = []
     for cls in form_classes:
-        all_students.extend(uat.get(cls, []))
+        all_students.extend(_get_students_for_exam(data, cls, exam_filter))
     ranking = sorted(
         [s for s in all_students if s.get('gp', 99) < 90],
         key=lambda x: (x['gp'], -(x.get('jumlah_markah', 0) if isinstance(x.get('jumlah_markah'), (int, float)) else 0))
@@ -1276,6 +1298,116 @@ EXAM_LABELS = {
 EXAM_LIST = ['UAT', 'PPT', 'PAT']
 EXAM_LIST_F5 = ['UAT', 'PPT', 'PSPM']
 
+def _get_students_for_exam(data, class_name, exam_filter):
+    """Return list of student dicts with marks from the specified exam.
+    For UAT: returns uat_data students directly.
+    For PPT: returns ppt_data students if available, else builds from marks_data.
+    For other exams: builds from marks_data overlaid on uat_data structure.
+    """
+    uat = data.get('uat_data', {})
+    uat_students = uat.get(class_name, [])
+    if not uat_students:
+        return []
+
+    if exam_filter == 'UAT':
+        return uat_students
+
+    # For PPT, use ppt_data if available (has GP, rankings, etc.)
+    if exam_filter == 'PPT':
+        ppt = data.get('ppt_data', {})
+        ppt_students = ppt.get(class_name, [])
+        if ppt_students:
+            return ppt_students
+
+    # Fallback: build student dicts from marks_data
+    fn = get_form_number(class_name)
+    is_upper = fn >= 4
+    GRADE_TABLE_UPPER = [
+        (90, 'A+', 1.0), (80, 'A', 2.0), (70, 'A-', 3.0),
+        (65, 'B+', 4.0), (60, 'B', 5.0), (55, 'C+', 6.0),
+        (50, 'C', 7.0), (45, 'D', 8.0), (40, 'E', 9.0), (0, 'G', 0.0)
+    ]
+    GRADE_TABLE_LOWER = [
+        (80, 'A', 1.0), (70, 'B', 2.0), (60, 'C', 3.0),
+        (50, 'D', 4.0), (40, 'E', 5.0), (0, 'F', 6.0)
+    ]
+    grade_table = GRADE_TABLE_UPPER if is_upper else GRADE_TABLE_LOWER
+
+    saved_marks = data.get('marks_data', {}).get(class_name, {})
+    result = []
+    for s in uat_students:
+        sname = s.get('name', '')
+        sm = saved_marks.get(sname, {}).get(exam_filter, {})
+        if not sm:
+            # No marks for this exam — include with empty subjects
+            student_copy = dict(s)
+            student_copy['subjects'] = {subj: {'mark': '', 'grade': '', 'taksiran': '', 'gp': None}
+                                        for subj in s.get('subject_order', [])}
+            student_copy['jumlah_markah'] = 0
+            student_copy['purata'] = 0
+            student_copy['gp'] = 99.0
+            student_copy['keputusan'] = ''
+            student_copy['kdk'] = '-'
+            student_copy['kdt'] = '-'
+            result.append(student_copy)
+            continue
+
+        student_copy = dict(s)
+        subjects = {}
+        total_marks = 0
+        total_gp = 0
+        subj_count = 0
+        for subj in s.get('subject_order', []):
+            m = sm.get(subj, '')
+            if m == 'TH':
+                subjects[subj] = {'mark': 'TH', 'grade': 'TH', 'taksiran': 'TIDAK HADIR', 'gp': None}
+            elif m != '' and m is not None:
+                try:
+                    mark_val = float(m)
+                    grade = ''
+                    gp = None
+                    for thresh, g, p in grade_table:
+                        if mark_val >= thresh:
+                            grade = g
+                            gp = p
+                            break
+                    taksiran = TAKSIRAN_MAP.get(grade, '')
+                    subjects[subj] = {'mark': mark_val, 'grade': grade, 'taksiran': taksiran, 'gp': gp}
+                    total_marks += mark_val
+                    if gp is not None:
+                        total_gp += gp
+                        subj_count += 1
+                except (ValueError, TypeError):
+                    subjects[subj] = {'mark': '', 'grade': '', 'taksiran': '', 'gp': None}
+            else:
+                subjects[subj] = {'mark': '', 'grade': '', 'taksiran': '', 'gp': None}
+
+        student_copy['subjects'] = subjects
+        student_copy['jumlah_markah'] = total_marks
+        student_copy['purata'] = round(total_marks / subj_count, 2) if subj_count > 0 else 0
+        student_copy['gp'] = round(total_gp / subj_count, 4) if subj_count > 0 else 99.0
+        student_copy['bil_subjects'] = subj_count
+        result.append(student_copy)
+
+    # Compute rankings
+    valid = [s for s in result if s['gp'] < 90]
+    valid.sort(key=lambda x: (x['gp'], -x.get('jumlah_markah', 0) if isinstance(x.get('jumlah_markah'), (int, float)) else 0))
+    total_in_class = len(result)
+    rank = 1
+    for i, s in enumerate(valid):
+        if i > 0 and valid[i]['gp'] != valid[i-1]['gp']:
+            rank = i + 1
+        s['kdk'] = f'{rank}/{total_in_class}'
+        s['kdk_rank'] = rank
+    for s in result:
+        if 'kdk_rank' not in s:
+            s['kdk'] = f'-/{total_in_class}'
+            s['kdk_rank'] = 9999
+        if 'kdt' not in s or s.get('kdt') in (None, ''):
+            s['kdt'] = '-'
+
+    return result
+
 @app.route('/slip-peperiksaan')
 def slip_peperiksaan_page():
     data = load_data()
@@ -1284,11 +1416,14 @@ def slip_peperiksaan_page():
     uat = data.get('uat_data', {})
     classes = {}
     for cls in sorted(uat.keys()):
-        fn = get_form_number(cls)
-        classes.setdefault(str(fn), []).append(cls)
-    for cls_name, students in uat.items():
-        for idx, s in enumerate(students):
+        fn_cls = get_form_number(cls)
+        classes.setdefault(str(fn_cls), []).append(cls)
+    # Use exam-specific student data for display
+    for cls_name in list(uat.keys()):
+        exam_students = _get_students_for_exam(data, cls_name, exam_filter)
+        for idx, s in enumerate(exam_students):
             s['_orig_idx'] = idx
+        uat[cls_name] = exam_students
     fn = int(form_filter) if form_filter.isdigit() else 1
     current_exams = EXAM_LIST_F5 if fn == 5 else EXAM_LIST
     return render_template('slip_peperiksaan.html', data=data, classes=classes,
@@ -1299,8 +1434,7 @@ def slip_peperiksaan_page():
 def slip_student(class_name, student_idx):
     data = load_data()
     exam_filter = request.args.get('exam', 'UAT')
-    uat = data.get('uat_data', {})
-    students = uat.get(class_name, [])
+    students = _get_students_for_exam(data, class_name, exam_filter)
     if student_idx >= len(students):
         return "Pelajar tidak dijumpai", 404
     student = students[student_idx]
@@ -1316,8 +1450,7 @@ def slip_student(class_name, student_idx):
 def print_slip_student(class_name, student_idx):
     data = load_data()
     exam_filter = request.args.get('exam', 'UAT')
-    uat = data.get('uat_data', {})
-    students = uat.get(class_name, [])
+    students = _get_students_for_exam(data, class_name, exam_filter)
     if student_idx >= len(students):
         return "Pelajar tidak dijumpai", 404
     student = students[student_idx]
@@ -1333,8 +1466,7 @@ def print_slip_student(class_name, student_idx):
 def print_slip_class(class_name):
     data = load_data()
     exam_filter = request.args.get('exam', 'UAT')
-    uat = data.get('uat_data', {})
-    students = uat.get(class_name, [])
+    students = _get_students_for_exam(data, class_name, exam_filter)
     si = data.get('school_info', {})
     guru = data.get('guru_kelas', {}).get(class_name, '')
     exam_label = EXAM_LABELS.get(exam_filter, exam_filter)
