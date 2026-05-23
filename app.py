@@ -1679,5 +1679,105 @@ def _build_slip_pdf(data, si, students, class_name, guru_kelas_name, exam_label=
     buffer.seek(0)
     return buffer
 
+# ============================================
+# PARENT/STUDENT RESULT CHECKING SYSTEM
+# ============================================
+
+@app.route('/check-result', methods=['GET', 'POST'])
+def check_result():
+    """Parent/Student friendly result checking page"""
+    data = load_data()
+
+    # Get all available classes from uat_data
+    all_classes = sorted(data.get('uat_data', {}).keys())
+
+    if request.method == 'POST':
+        student_name = request.form.get('student_name', '').strip().upper()
+        class_name = request.form.get('class', '').strip()
+        exam_type = request.form.get('exam_type', '').strip()
+
+        if not student_name or not class_name or not exam_type:
+            return render_template('check_result.html',
+                                   all_classes=all_classes,
+                                   error='Sila lengkapkan semua maklumat',
+                                   data=data)
+
+        # Search for student
+        if exam_type == 'UAT':
+            exam_data = data.get('uat_data', {})
+        else:  # PPT
+            exam_data = data.get('ppt_data', {})
+
+        class_students = exam_data.get(class_name, [])
+
+        # Find student by name (fuzzy match)
+        found_student = None
+        for student in class_students:
+            if student_name in student.get('name', '').upper():
+                found_student = student
+                break
+
+        if not found_student:
+            return render_template('check_result.html',
+                                   all_classes=all_classes,
+                                   error='Pelajar tidak dijumpai. Sila periksa nama dan kelas.',
+                                   data=data)
+
+        # Calculate statistics
+        subjects = found_student.get('subjects', {})
+        total_subjects = 0
+        passed_subjects = 0
+        total_gp = 0
+        valid_grades = 0
+
+        grade_values = {'A+': 1, 'A': 2, 'A-': 3, 'B+': 4, 'B': 5, 'B-': 6,
+                       'C+': 7, 'C': 8, 'C-': 9, 'D': 10, 'E': 11, 'F': 12, 'G': 0}
+
+        for subject, result in subjects.items():
+            if result.get('mark') or result.get('grade'):
+                total_subjects += 1
+                grade = result.get('grade', '')
+                if grade and grade in grade_values:
+                    total_gp += grade_values[grade]
+                    valid_grades += 1
+                    if grade not in ['F', 'G']:
+                        passed_subjects += 1
+
+        # Calculate average grade
+        average_grade = '-'
+        gpa = '-'
+        if valid_grades > 0:
+            avg_gp = total_gp / valid_grades
+            gpa = f'{avg_gp:.2f}'
+            # Convert GP to grade
+            if avg_gp <= 1.5:
+                average_grade = 'A'
+            elif avg_gp <= 2.5:
+                average_grade = 'B'
+            elif avg_gp <= 3.5:
+                average_grade = 'C'
+            elif avg_gp <= 4.5:
+                average_grade = 'D'
+            elif avg_gp <= 5.5:
+                average_grade = 'E'
+            else:
+                average_grade = 'F'
+
+        exam_names = {'UAT': 'Ujian Awal Tahun', 'PPT': 'Pentaksiran Pertengahan Tahun'}
+
+        return render_template('result_display.html',
+                               student=found_student,
+                               subjects=subjects,
+                               exam_type=exam_type,
+                               exam_full_name=exam_names.get(exam_type, exam_type),
+                               total_subjects=total_subjects,
+                               passed_subjects=passed_subjects,
+                               average_grade=average_grade,
+                               gpa=gpa,
+                               data=data)
+
+    return render_template('check_result.html', all_classes=all_classes, data=data)
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

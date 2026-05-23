@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semak Keputusan Peperiksaan - SMKTLS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #1e3a5f 100%); }
+        .card-shadow { box-shadow: 0 10px 40px -10px rgba(0,0,0,0.2); }
+        .input-focus:focus { box-shadow: 0 0 0 3px rgba(45, 90, 135, 0.3); border-color: #2d5a87; }
+        .btn-hover { transition: all 0.3s ease; }
+        .btn-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 20px -5px rgba(45, 90, 135, 0.4); }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 to-blue-50 min-h-screen">
+    <!-- Header -->
+    <div class="gradient-bg text-white py-6">
+        <div class="max-w-lg mx-auto px-4 text-center">
+            <div class="flex justify-center mb-3">
+                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+            </div>
+            <h1 class="text-2xl font-bold">SEMak Keputusan</h1>
+            <p class="text-blue-200 text-sm mt-1">SMK Tuanku Lailatul Shahreen</p>
+            <p class="text-blue-300 text-xs mt-0.5">Ujian Awal Tahun (UAT) & Pentaksiran Pertengahan Tahun (PPT)</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-lg mx-auto px-4 py-8">
+        <!-- Search Form Card -->
+        <div class="bg-white rounded-2xl card-shadow p-6 md:p-8">
+            <h2 class="text-lg font-bold text-slate-800 mb-6 text-center">
+                Masukkan Maklumat Pelajar
+            </h2>
+
+            {% if error %}
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-red-700 text-sm">{{ error }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/check-result" class="space-y-5">
+                <!-- Full Name -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                        Nama Penuh Pelajar
+                    </label>
+                    <input type="text" name="student_name" required
+                           placeholder="Contoh: AHMAD BIN ABU"
+                           class="w-full px-4 py-3 rounded-xl border border-slate-300 input-focus outline-none transition-all"
+                           value="{{ request.form.get('student_name', '') }}">
+                    <p class="text-xs text-slate-500 mt-1">Masukkan nama seperti dalam kad pengenalan</p>
+                </div>
+
+                <!-- Class -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                        Kelas
+                    </label>
+                    <select name="class" required
+                            class="w-full px-4 py-3 rounded-xl border border-slate-300 input-focus outline-none transition-all bg-white">
+                        <option value="">-- Pilih Kelas --</option>
+                        {% for cls in all_classes %}
+                        <option value="{{ cls }}" {% if request.form.get('class') == cls %}selected{% endif %}>
+                            {{ cls }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Exam Type -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                        Jenis Peperiksaan
+                    </label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="exam_type" value="UAT" required
+                                   class="peer sr-only"
+                                   {% if request.form.get('exam_type') == 'UAT' %}checked{% endif %}>
+                            <div class="px-4 py-3 rounded-xl border-2 border-slate-200 text-center peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-checked:text-blue-700 transition-all">
+                                <span class="font-semibold">UAT</span>
+                                <p class="text-xs mt-1 opacity-70">Ujian Awal Tahun</p>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="exam_type" value="PPT" required
+                                   class="peer sr-only"
+                                   {% if request.form.get('exam_type') == 'PPT' %}checked{% endif %}>
+                            <div class="px-4 py-3 rounded-xl border-2 border-slate-200 text-center peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-checked:text-blue-700 transition-all">
+                                <span class="font-semibold">PPT</span>
+                                <p class="text-xs mt-1 opacity-70">Pertengahan Tahun</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit"
+                        class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-4 rounded-xl btn-hover mt-6">
+                    <span class="flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        Semak Keputusan
+                    </span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Instructions -->
+        <div class="mt-6 bg-blue-50 rounded-xl p-4">
+            <h3 class="text-sm font-bold text-blue-800 mb-2 flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Panduan Penggunaan
+            </h3>
+            <ul class="text-xs text-blue-700 space-y-1 ml-6 list-disc">
+                <li>Masukkan nama penuh pelajar seperti dalam rekod sekolah</li>
+                <li>Pilih kelas yang betul</li>
+                <li>Pilih jenis peperiksaan (UAT atau PPT)</li>
+                <li>Klik butang "Semak Keputusan"</li>
+            </ul>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-slate-500 text-xs">
+            <p>&copy; 2026 SMK Tuanku Lailatul Shahreen</p>
+            <p class="mt-1">Sistem DAPA 2026 | Jabatan Pendidikan Negeri Perlis</p>
+        </div>
+    </div>
+</body>
+</html>
